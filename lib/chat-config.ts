@@ -47,10 +47,7 @@ function saveConfig(config: Partial<ChatConfig>): void {
 
   try {
     const currentConfig = loadConfig();
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ ...currentConfig, ...config }),
-    );
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...currentConfig, ...config }));
   } catch {
     return;
   }

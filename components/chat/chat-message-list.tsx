@@ -3,20 +3,16 @@
 import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
 import { Bot, Loader2, User2 } from "lucide-react";
-import type { MutableRefObject } from "react";
+import type { RefObject } from "react";
 import { getMessageText } from "./chat-types";
 
 type ChatMessageListProps = {
   messages: readonly UIMessage[];
   isRunning: boolean;
-  bottomRef: MutableRefObject<HTMLDivElement | null>;
+  bottomRef: RefObject<HTMLDivElement | null>;
 };
 
-export function ChatMessageList({
-  messages,
-  isRunning,
-  bottomRef,
-}: ChatMessageListProps) {
+export function ChatMessageList({ messages, isRunning, bottomRef }: ChatMessageListProps) {
   return (
     <>
       {messages.map((message) => {

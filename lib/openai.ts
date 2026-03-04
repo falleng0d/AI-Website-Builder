@@ -1,5 +1,5 @@
-import { createOpenAI } from '@ai-sdk/openai';
-import { z } from 'zod';
+import { createOpenAI } from "@ai-sdk/openai";
+import { z } from "zod";
 import { type ModelsList, ModelsListSchema } from "./openai.schema";
 
 const openaiBaseUrl = process.env.OPENAI_BASE_URL || "https://api.openai.com/v1";
@@ -13,7 +13,7 @@ export const openai = createOpenAI({
 export async function listModels(): Promise<ModelsList> {
   const response = await fetch(`${openai}/models`, {
     headers: {
-      "Authorization": `Bearer ${openaiApiKey}`,
+      Authorization: `Bearer ${openaiApiKey}`,
     },
   });
 
@@ -25,13 +25,13 @@ export async function listModels(): Promise<ModelsList> {
   const models = ModelsListSchema.parse(await response.json());
 
   // remove embedding models
-  models.data = models.data.filter(m => !m.id.match(/text|embedding/));
+  models.data = models.data.filter((m) => !m.id.match(/text|embedding/));
   // remove image models
-  models.data = models.data.filter(m => !m.id.includes("image"));
+  models.data = models.data.filter((m) => !m.id.includes("image"));
   // remove video models
-  models.data = models.data.filter(m => !m.id.match(/vision|video|sora/));
+  models.data = models.data.filter((m) => !m.id.match(/vision|video|sora/));
   // remove audio models
-  models.data = models.data.filter(m => !m.id.match(/audio|tts|transcribe/));
+  models.data = models.data.filter((m) => !m.id.match(/audio|tts|transcribe/));
 
   models.total = models.data.length;
 

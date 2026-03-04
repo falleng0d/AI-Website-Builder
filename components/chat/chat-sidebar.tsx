@@ -53,16 +53,14 @@ export function ChatSidebar({
           <div className="space-y-4">
             <div className="rounded-2xl border border-border/70 bg-background/80 p-4">
               <p className="text-sm font-semibold">Start building with AI</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Describe the website you want and iterate from there.
-              </p>
+              <p className="mt-1 text-sm text-muted-foreground">Describe the website you want and iterate from there.</p>
             </div>
             <div className="space-y-2">
               {CHAT_STARTER_PROMPTS.map((prompt) => (
                 <Button
                   key={prompt}
                   variant="outline"
-                  className="h-auto w-full justify-start whitespace-normal py-3 text-left"
+                  className="h-auto w-full justify-start py-3 text-left whitespace-normal"
                   onClick={() => {
                     void onSubmitPrompt(prompt);
                   }}
@@ -73,11 +71,7 @@ export function ChatSidebar({
             </div>
           </div>
         ) : (
-          <ChatMessageList
-            messages={messages}
-            isRunning={isRunning}
-            bottomRef={bottomRef}
-          />
+          <ChatMessageList messages={messages} isRunning={isRunning} bottomRef={bottomRef} />
         )}
       </div>
 

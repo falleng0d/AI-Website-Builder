@@ -48,12 +48,7 @@ export function ChatComposer({
           }}
         />
         <div className="flex items-center justify-between gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onClear}
-            disabled={!hasMessages || isRunning}
-          >
+          <Button type="button" variant="ghost" onClick={onClear} disabled={!hasMessages || isRunning}>
             <Trash2 className="h-4 w-4" />
             Clear
           </Button>

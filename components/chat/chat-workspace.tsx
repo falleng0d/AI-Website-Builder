@@ -16,10 +16,7 @@ const PREVIEW_MIN_WIDTH = 320;
 const clampSidebarWidth = (width: number, containerWidth: number): number => {
   const maxWidth = Math.max(
     SIDEBAR_MIN_WIDTH,
-    Math.min(
-      containerWidth * SIDEBAR_MAX_WIDTH_RATIO,
-      containerWidth - PREVIEW_MIN_WIDTH,
-    ),
+    Math.min(containerWidth * SIDEBAR_MAX_WIDTH_RATIO, containerWidth - PREVIEW_MIN_WIDTH),
   );
 
   return Math.min(Math.max(width, SIDEBAR_MIN_WIDTH), maxWidth);
@@ -27,30 +24,20 @@ const clampSidebarWidth = (width: number, containerWidth: number): number => {
 
 export function ChatWorkspace() {
   const [input, setInput] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(
-    ChatConfigService.defaultConfig.showSidebar,
-  );
+  const [isSidebarOpen, setIsSidebarOpen] = useState(ChatConfigService.defaultConfig.showSidebar);
   const [isResizing, setIsResizing] = useState(false);
-  const [sidebarWidth, setSidebarWidth] = useState(
-    ChatConfigService.defaultConfig.sidebarWidth,
-  );
+  const [sidebarWidth, setSidebarWidth] = useState(ChatConfigService.defaultConfig.sidebarWidth);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const transport = useMemo(
-    () => new DefaultChatTransport({ api: "/api/chat" }),
-    [],
-  );
+  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
 
   const { messages, sendMessage, status, error, stop, setMessages } = useChat({
     transport,
   });
 
-  const visibleMessages = useMemo(
-    () => messages.filter((message) => message.role !== "system"),
-    [messages],
-  );
+  const visibleMessages = useMemo(() => messages.filter((message) => message.role !== "system"), [messages]);
 
   const isRunning = status === "submitted" || status === "streaming";
 
@@ -93,10 +80,7 @@ export function ChatWorkspace() {
       if (!container) return;
 
       setSidebarWidth((currentWidth) => {
-        const nextWidth = clampSidebarWidth(
-          currentWidth,
-          container.getBoundingClientRect().width,
-        );
+        const nextWidth = clampSidebarWidth(currentWidth, container.getBoundingClientRect().width);
 
         if (nextWidth === currentWidth) {
           return currentWidth;
@@ -154,20 +138,14 @@ export function ChatWorkspace() {
     if (!container) return;
 
     const defaultWidth = ChatConfigService.defaultConfig.sidebarWidth;
-    const nextWidth = clampSidebarWidth(
-      defaultWidth,
-      container.getBoundingClientRect().width,
-    );
+    const nextWidth = clampSidebarWidth(defaultWidth, container.getBoundingClientRect().width);
 
     setSidebarWidth(nextWidth);
   };
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <ChatTopBar
-        isSidebarOpen={isSidebarOpen}
-        onToggleSidebar={() => setIsSidebarOpen((value) => !value)}
-      />
+      <ChatTopBar isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen((value) => !value)} />
 
       <div ref={containerRef} className="flex min-h-0 flex-1">
         <ChatSidebar
@@ -185,11 +163,7 @@ export function ChatWorkspace() {
           onStop={stop}
         />
 
-        <ChatResizeHandle
-          isVisible={isSidebarOpen}
-          onPointerDown={handleResizeStart}
-          onDoubleClick={handleResizeReset}
-        />
+        <ChatResizeHandle isVisible={isSidebarOpen} onPointerDown={handleResizeStart} onDoubleClick={handleResizeReset} />
 
         <ChatPreviewPanel isSidebarOpen={isSidebarOpen} />
       </div>

@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
-import { Noto_Sans_KR } from 'next/font/google';
+import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "@/components/ui/sonner";
 
 const notoSansKR = Noto_Sans_KR({
-  weight: ['300', '400', '500', '700'],
-  subsets: ['latin'],
-  variable: '--font-noto-sans-kr',
-  display: 'swap',
+  weight: ["300", "400", "500", "700"],
+  subsets: ["latin"],
+  variable: "--font-noto-sans-kr",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "AI Website Builder",
   description: "Build your website by just talking to AI in your own language",
   icons: {
-    icon: '/logo.png'
-  }
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -26,14 +26,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${notoSansKR.variable}`} suppressHydrationWarning>
-      <body
-        className={` antialiased`}
-      >
+      <body className={`antialiased`}>
         <NextTopLoader showSpinner={false} height={6} color="#000000" />
         <Toaster richColors position="top-right" />
-        <main className="min-h-screen">
-          {children}
-        </main>
+        <main className="min-h-screen">{children}</main>
       </body>
     </html>
   );

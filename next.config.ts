@@ -14,12 +14,14 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/",
-        headers: [{
-          key: "X-Tracking-Id",
-          value: Math.random().toString(36).substring(7),
-        }],
+        headers: [
+          {
+            key: "X-Tracking-Id",
+            value: Math.random().toString(36).substring(7),
+          },
+        ],
       },
-    ]
+    ];
   },
 };
 
