@@ -9,11 +9,7 @@ type ChatResizeHandleProps = {
   onDoubleClickAction?: MouseEventHandler<HTMLDivElement>;
 };
 
-export function ChatResizeHandle({
-  isVisible,
-  onPointerDownAction,
-  onDoubleClickAction,
-}: ChatResizeHandleProps) {
+export function ChatResizeHandle({ isVisible, onPointerDownAction, onDoubleClickAction }: ChatResizeHandleProps) {
   if (!isVisible) return null;
 
   return (

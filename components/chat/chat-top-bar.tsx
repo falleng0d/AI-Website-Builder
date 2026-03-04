@@ -8,10 +8,7 @@ type ChatTopBarProps = {
   onToggleSidebarAction: () => void;
 };
 
-export function ChatTopBar({
-  isSidebarOpen,
-  onToggleSidebarAction,
-}: ChatTopBarProps) {
+export function ChatTopBar({ isSidebarOpen, onToggleSidebarAction }: ChatTopBarProps) {
   return (
     <header className="flex h-14 items-center border-b border-border/70 bg-background/95 px-3 backdrop-blur">
       <Button
