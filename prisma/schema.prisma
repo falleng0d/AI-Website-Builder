@@ -72,14 +72,14 @@ model Verification {
 }
 
 model ChatMessage {
-  id               String      @id @default(cuid())
-  jobApplicationId String
-  role             MessageRole
-  content          String
-  parts            String
-  createdAt        DateTime    @default(now())
+  id        String      @id @default(cuid())
+  chatId    String
+  role      MessageRole
+  content   String
+  parts     String
+  createdAt DateTime    @default(now())
 
-  @@index([jobApplicationId])
+  @@index([chatId])
 }
 
 enum MessageRole {

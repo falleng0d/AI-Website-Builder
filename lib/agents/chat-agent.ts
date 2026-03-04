@@ -1,14 +1,19 @@
-import { stepCountIs, ToolLoopAgent } from "ai";
+import { ToolLoopAgent, stepCountIs } from "ai";
 import { createHash } from "node:crypto";
 import { openai } from "@/lib/openai";
 
 export interface ChatAgentContext {
   userName?: string;
+  chatId?: string;
 }
 
 interface CreateChatAgentOptions {
   modelId: string;
   context?: ChatAgentContext;
+}
+
+export function hashString(text: string): string {
+  return createHash("sha256").update(text, "utf8").digest("hex");
 }
 
 export function buildChatSystemPrompt(context: ChatAgentContext = {}): string {
@@ -29,6 +34,7 @@ export function buildChatSystemPrompt(context: ChatAgentContext = {}): string {
 
 export function createChatAgent({ modelId, context = {} }: CreateChatAgentOptions): ToolLoopAgent {
   const systemPrompt = buildChatSystemPrompt(context);
+  const promptCacheKey = context.chatId?.trim() || hashString(systemPrompt);
 
   return new ToolLoopAgent({
     id: "chat-route-agent",
@@ -36,7 +42,7 @@ export function createChatAgent({ modelId, context = {} }: CreateChatAgentOption
     instructions: systemPrompt,
     providerOptions: {
       anthropic: { cacheControl: { type: "ephemeral" } },
-      openai: { promptCacheKey: createHash("sha256").update(systemPrompt, "utf8").digest("hex") },
+      openai: { promptCacheKey },
     },
     tools: {},
     stopWhen: stepCountIs(15),
