@@ -1,4 +1,4 @@
-import { ToolLoopAgent, stepCountIs } from "ai";
+import { stepCountIs, ToolLoopAgent } from "ai";
 import { createHash } from "node:crypto";
 import { openai } from "@/lib/openai";
 
@@ -9,10 +9,6 @@ export interface ChatAgentContext {
 interface CreateChatAgentOptions {
   modelId: string;
   context?: ChatAgentContext;
-}
-
-export function hashString(text: string): string {
-  return createHash("sha256").update(text, "utf8").digest("hex");
 }
 
 export function buildChatSystemPrompt(context: ChatAgentContext = {}): string {
@@ -40,7 +36,7 @@ export function createChatAgent({ modelId, context = {} }: CreateChatAgentOption
     instructions: systemPrompt,
     providerOptions: {
       anthropic: { cacheControl: { type: "ephemeral" } },
-      openai: { promptCacheKey: hashString(systemPrompt) },
+      openai: { promptCacheKey: createHash("sha256").update(systemPrompt, "utf8").digest("hex") },
     },
     tools: {},
     stopWhen: stepCountIs(15),
