@@ -48,33 +48,9 @@ export default function TechStackSection() {
                Powered by Modern Technology
             </h2>
             <p className="text-xl text-muted-foreground pt-1">
-               Built with the latest and most reliable technologies in the industry
+
             </p>
          </FadeInView>
-
-         <Card className="grid divide-x divide-y overflow-hidden rounded-3xl border border-card sm:grid-cols-2 lg:grid-cols-3 lg:divide-y-0">
-            {stack.map((item, index) => (
-               <FadeInView
-                  key={index}
-                  delay={0.1 * (index + 2)}
-                  className="group relative transition-shadow duration-300 hover:z-[1] hover:shadow-2xl hover:shadow-primary"
-               >
-                  <div className="relative space-y-8 py-12 p-8">
-                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                        {item.icon}
-                     </div>
-                     <div className="space-y-2">
-                        <h5 className="text-xl text-muted-foreground font-semibold transition group-hover:text-primary">
-                           {item.name}
-                        </h5>
-                        <p className="text-muted-foreground">
-                           {item.description}
-                        </p>
-                     </div>
-                  </div>
-               </FadeInView>
-            ))}
-         </Card>
       </section>
    )
 }

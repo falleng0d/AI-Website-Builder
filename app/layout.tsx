@@ -12,8 +12,8 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "Better Auth Starter",
-  description: "Next.js + Better Auth + Shadcn UI + Tailwind CSS",
+  title: "AI Website Builder",
+  description: "Build your website by just talking to AI in your own language",
   icons: {
     icon: '/logo.png'
   }
