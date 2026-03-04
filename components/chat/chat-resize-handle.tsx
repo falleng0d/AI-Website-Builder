@@ -5,11 +5,15 @@ import type { MouseEventHandler, PointerEventHandler } from "react";
 
 type ChatResizeHandleProps = {
   isVisible: boolean;
-  onPointerDown: PointerEventHandler<HTMLDivElement>;
-  onDoubleClick?: MouseEventHandler<HTMLDivElement>;
+  onPointerDownAction: PointerEventHandler<HTMLDivElement>;
+  onDoubleClickAction?: MouseEventHandler<HTMLDivElement>;
 };
 
-export function ChatResizeHandle({ isVisible, onPointerDown, onDoubleClick }: ChatResizeHandleProps) {
+export function ChatResizeHandle({
+  isVisible,
+  onPointerDownAction,
+  onDoubleClickAction,
+}: ChatResizeHandleProps) {
   if (!isVisible) return null;
 
   return (
@@ -18,8 +22,8 @@ export function ChatResizeHandle({ isVisible, onPointerDown, onDoubleClick }: Ch
       aria-orientation="vertical"
       aria-label="Resize chat sidebar"
       title="Drag to resize. Double-click to reset."
-      onPointerDown={onPointerDown}
-      onDoubleClick={onDoubleClick}
+      onPointerDown={onPointerDownAction}
+      onDoubleClick={onDoubleClickAction}
       className="group relative hidden w-2 shrink-0 cursor-col-resize touch-none bg-transparent md:block"
     >
       <div

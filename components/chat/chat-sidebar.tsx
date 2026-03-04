@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
-import type { CSSProperties, MutableRefObject } from "react";
+import type { CSSProperties, RefObject } from "react";
 import { ChatComposer } from "./chat-composer";
 import { ChatMessageList } from "./chat-message-list";
 import { CHAT_STARTER_PROMPTS } from "./chat-types";
@@ -16,11 +16,11 @@ type ChatSidebarProps = {
   isRunning: boolean;
   input: string;
   error: Error | undefined;
-  bottomRef: MutableRefObject<HTMLDivElement | null>;
-  onInputChange: (value: string) => void;
-  onSubmitPrompt: (prompt: string) => Promise<void>;
-  onClear: () => void;
-  onStop: () => void;
+  bottomRef: RefObject<HTMLDivElement | null>;
+  onInputChangeAction: (value: string) => void;
+  onSubmitPromptAction: (prompt: string) => Promise<void>;
+  onClearAction: () => void;
+  onStopAction: () => void;
 };
 
 export function ChatSidebar({
@@ -32,10 +32,10 @@ export function ChatSidebar({
   input,
   error,
   bottomRef,
-  onInputChange,
-  onSubmitPrompt,
-  onClear,
-  onStop,
+  onInputChangeAction,
+  onSubmitPromptAction,
+  onClearAction,
+  onStopAction,
 }: ChatSidebarProps) {
   const hasMessages = messages.length > 0;
 
@@ -62,7 +62,7 @@ export function ChatSidebar({
                   variant="outline"
                   className="h-auto w-full justify-start py-3 text-left whitespace-normal"
                   onClick={() => {
-                    void onSubmitPrompt(prompt);
+                    void onSubmitPromptAction(prompt);
                   }}
                 >
                   {prompt}
@@ -80,10 +80,10 @@ export function ChatSidebar({
         isRunning={isRunning}
         hasMessages={hasMessages}
         error={error}
-        onInputChange={onInputChange}
-        onSubmit={() => onSubmitPrompt(input)}
-        onClear={onClear}
-        onStop={onStop}
+        onInputChangeAction={onInputChangeAction}
+        onSubmitAction={() => onSubmitPromptAction(input)}
+        onClearAction={onClearAction}
+        onStopAction={onStopAction}
       />
     </aside>
   );

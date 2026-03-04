@@ -10,10 +10,10 @@ type ChatComposerProps = {
   isRunning: boolean;
   hasMessages: boolean;
   error: Error | undefined;
-  onInputChange: (value: string) => void;
-  onSubmit: () => Promise<void>;
-  onClear: () => void;
-  onStop: () => void;
+  onInputChangeAction: (value: string) => void;
+  onSubmitAction: () => Promise<void>;
+  onClearAction: () => void;
+  onStopAction: () => void;
 };
 
 export function ChatComposer({
@@ -21,10 +21,10 @@ export function ChatComposer({
   isRunning,
   hasMessages,
   error,
-  onInputChange,
-  onSubmit,
-  onClear,
-  onStop,
+  onInputChangeAction,
+  onSubmitAction,
+  onClearAction,
+  onStopAction,
 }: ChatComposerProps) {
   return (
     <div className="border-t border-border/70 bg-background/85 p-3">
@@ -32,30 +32,35 @@ export function ChatComposer({
         className="space-y-2"
         onSubmit={(event) => {
           event.preventDefault();
-          void onSubmit();
+          void onSubmitAction();
         }}
       >
         <Textarea
           value={input}
-          onChange={(event) => onInputChange(event.target.value)}
+          onChange={(event) => onInputChangeAction(event.target.value)}
           placeholder="Describe your design..."
           className="min-h-20"
           onKeyDown={(event) => {
             if (event.key === "Enter" && !event.shiftKey) {
               event.preventDefault();
-              void onSubmit();
+              void onSubmitAction();
             }
           }}
         />
         <div className="flex items-center justify-between gap-2">
-          <Button type="button" variant="ghost" onClick={onClear} disabled={!hasMessages || isRunning}>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onClearAction}
+            disabled={!hasMessages || isRunning}
+          >
             <Trash2 className="h-4 w-4" />
             Clear
           </Button>
 
           <div className="flex items-center gap-2">
             {isRunning ? (
-              <Button type="button" variant="outline" onClick={onStop}>
+              <Button type="button" variant="outline" onClick={onStopAction}>
                 <Square className="h-4 w-4" />
                 Stop
               </Button>

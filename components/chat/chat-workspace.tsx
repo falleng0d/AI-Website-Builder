@@ -145,7 +145,11 @@ export function ChatWorkspace() {
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <ChatTopBar isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen((value) => !value)} />
+      <ChatTopBar
+        isSidebarOpen={isSidebarOpen}
+        onToggleSidebarAction={() => setIsSidebarOpen((value) => !value)}
+      />
+
 
       <div ref={containerRef} className="flex min-h-0 flex-1">
         <ChatSidebar
@@ -157,13 +161,17 @@ export function ChatWorkspace() {
           input={input}
           error={error}
           bottomRef={bottomRef}
-          onInputChange={setInput}
-          onSubmitPrompt={submitPrompt}
-          onClear={() => setMessages([])}
-          onStop={stop}
+          onInputChangeAction={setInput}
+          onSubmitPromptAction={submitPrompt}
+          onClearAction={() => setMessages([])}
+          onStopAction={stop}
         />
 
-        <ChatResizeHandle isVisible={isSidebarOpen} onPointerDown={handleResizeStart} onDoubleClick={handleResizeReset} />
+        <ChatResizeHandle
+          isVisible={isSidebarOpen}
+          onPointerDownAction={handleResizeStart}
+          onDoubleClickAction={handleResizeReset}
+        />
 
         <ChatPreviewPanel isSidebarOpen={isSidebarOpen} />
       </div>
