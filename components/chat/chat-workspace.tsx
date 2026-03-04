@@ -23,7 +23,7 @@ const clampSidebarWidth = (width: number, containerWidth: number): number => {
 };
 
 export function ChatWorkspace() {
-  const [input, setInput] = useState("");
+  const [inputText, setInputText] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(ChatConfigService.defaultConfig.showSidebar);
   const [isResizing, setIsResizing] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(ChatConfigService.defaultConfig.sidebarWidth);
@@ -102,7 +102,7 @@ export function ChatWorkspace() {
     const trimmed = prompt.trim();
     if (!trimmed || isRunning) return;
 
-    setInput("");
+    setInputText("");
     await sendMessage({ text: trimmed });
   };
 
@@ -145,11 +145,7 @@ export function ChatWorkspace() {
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <ChatTopBar
-        isSidebarOpen={isSidebarOpen}
-        onToggleSidebarAction={() => setIsSidebarOpen((value) => !value)}
-      />
-
+      <ChatTopBar isSidebarOpen={isSidebarOpen} onToggleSidebarAction={() => setIsSidebarOpen((value) => !value)} />
 
       <div ref={containerRef} className="flex min-h-0 flex-1">
         <ChatSidebar
@@ -158,10 +154,10 @@ export function ChatWorkspace() {
           isResizing={isResizing}
           messages={visibleMessages}
           isRunning={isRunning}
-          input={input}
+          inputText={inputText}
           error={error}
           bottomRef={bottomRef}
-          onInputChangeAction={setInput}
+          onInputChangeAction={setInputText}
           onSubmitPromptAction={submitPrompt}
           onClearAction={() => setMessages([])}
           onStopAction={stop}

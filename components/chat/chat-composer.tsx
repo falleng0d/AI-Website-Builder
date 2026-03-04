@@ -3,10 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Square, Trash2 } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { ChatSendButton } from "./chat-send-button";
 
 type ChatComposerProps = {
-  input: string;
+  inputText: string;
   isRunning: boolean;
   hasMessages: boolean;
   error: Error | undefined;
@@ -17,7 +18,7 @@ type ChatComposerProps = {
 };
 
 export function ChatComposer({
-  input,
+  inputText,
   isRunning,
   hasMessages,
   error,
@@ -26,6 +27,8 @@ export function ChatComposer({
   onClearAction,
   onStopAction,
 }: ChatComposerProps) {
+  const textAreaInputRef = useRef<HTMLTextAreaElement>(null);
+
   return (
     <div className="border-t border-border/70 bg-background/85 p-3">
       <form
@@ -36,10 +39,11 @@ export function ChatComposer({
         }}
       >
         <Textarea
-          value={input}
+          value={inputText}
           onChange={(event) => onInputChangeAction(event.target.value)}
           placeholder="Describe your design..."
           className="min-h-20"
+          ref={textAreaInputRef}
           onKeyDown={(event) => {
             if (event.key === "Enter" && !event.shiftKey) {
               event.preventDefault();
@@ -48,12 +52,7 @@ export function ChatComposer({
           }}
         />
         <div className="flex items-center justify-between gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onClearAction}
-            disabled={!hasMessages || isRunning}
-          >
+          <Button type="button" variant="ghost" onClick={onClearAction} disabled={!hasMessages || isRunning}>
             <Trash2 className="h-4 w-4" />
             Clear
           </Button>
@@ -65,7 +64,7 @@ export function ChatComposer({
                 Stop
               </Button>
             ) : null}
-            <ChatSendButton disabled={!input.trim() || isRunning} />
+            <ChatSendButton disabled={!inputText.trim() || isRunning} />
           </div>
         </div>
       </form>

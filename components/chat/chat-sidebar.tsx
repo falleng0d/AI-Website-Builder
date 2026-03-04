@@ -14,8 +14,8 @@ type ChatSidebarProps = {
   isResizing: boolean;
   messages: readonly UIMessage[];
   isRunning: boolean;
-  input: string;
-  error: Error | undefined;
+  inputText: string;
+  error?: Error;
   bottomRef: RefObject<HTMLDivElement | null>;
   onInputChangeAction: (value: string) => void;
   onSubmitPromptAction: (prompt: string) => Promise<void>;
@@ -29,7 +29,7 @@ export function ChatSidebar({
   isResizing,
   messages,
   isRunning,
-  input,
+  inputText,
   error,
   bottomRef,
   onInputChangeAction,
@@ -62,7 +62,7 @@ export function ChatSidebar({
                   variant="outline"
                   className="h-auto w-full justify-start py-3 text-left whitespace-normal"
                   onClick={() => {
-                    void onSubmitPromptAction(prompt);
+                    onInputChangeAction(prompt);
                   }}
                 >
                   {prompt}
@@ -76,12 +76,12 @@ export function ChatSidebar({
       </div>
 
       <ChatComposer
-        input={input}
+        inputText={inputText}
         isRunning={isRunning}
         hasMessages={hasMessages}
         error={error}
         onInputChangeAction={onInputChangeAction}
-        onSubmitAction={() => onSubmitPromptAction(input)}
+        onSubmitAction={() => onSubmitPromptAction(inputText)}
         onClearAction={onClearAction}
         onStopAction={onStopAction}
       />
