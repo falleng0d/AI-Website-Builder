@@ -71,16 +71,18 @@ model Verification {
   @@map("verification")
 }
 
-model Todo {
-  id        String   @id @default(uuid())
-  name      String
-  completed Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model ChatMessage {
+  id               String      @id @default(cuid())
+  jobApplicationId String
+  role             MessageRole
+  content          String
+  parts            String
+  createdAt        DateTime    @default(now())
 
-  parentId String?
-  parent   Todo?   @relation("TodoParent", fields: [parentId], references: [id])
-  children Todo[]  @relation("TodoParent")
+  @@index([jobApplicationId])
+}
 
-  @@map("todo")
+enum MessageRole {
+  USER
+  ASSISTANT
 }
