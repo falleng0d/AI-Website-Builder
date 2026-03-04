@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
-import type { CSSProperties, RefObject } from "react";
+import { useState, type CSSProperties, type RefObject } from "react";
 import { ChatComposer } from "./chat-composer";
 import { ChatMessageList } from "./chat-message-list";
 import { CHAT_STARTER_PROMPTS } from "./chat-types";
@@ -38,6 +38,7 @@ export function ChatSidebar({
   onStopAction,
 }: ChatSidebarProps) {
   const hasMessages = messages.length > 0;
+  const [focusRequestToken, setFocusRequestToken] = useState(0);
 
   return (
     <aside
@@ -63,6 +64,7 @@ export function ChatSidebar({
                   className="h-auto w-full justify-start py-3 text-left whitespace-normal"
                   onClick={() => {
                     onInputChangeAction(prompt);
+                    setFocusRequestToken((currentToken) => currentToken + 1);
                   }}
                 >
                   {prompt}
@@ -80,6 +82,7 @@ export function ChatSidebar({
         isRunning={isRunning}
         hasMessages={hasMessages}
         error={error}
+        focusRequestToken={focusRequestToken}
         onInputChangeAction={onInputChangeAction}
         onSubmitAction={() => onSubmitPromptAction(inputText)}
         onClearAction={onClearAction}

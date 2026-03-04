@@ -1,4 +1,4 @@
-import { streamText, UIMessage, convertToModelMessages, stepCountIs } from "ai";
+import { createAgentUIStreamResponse, ToolLoopAgent, UIMessage, stepCountIs } from "ai";
 import { createHash } from "node:crypto";
 import { openai } from "@/lib/openai";
 import { z } from "zod";
@@ -27,6 +27,20 @@ async function buildSystemPrompt(context: ChatContext): Promise<string> {
   return sections.join("\n");
 }
 
+function createChatAgent(systemPrompt: string, modelId: string): ToolLoopAgent {
+  return new ToolLoopAgent({
+    id: "chat-route-agent",
+    model: openai.chat(modelId),
+    instructions: systemPrompt,
+    providerOptions: {
+      anthropic: { cacheControl: { type: "ephemeral" } },
+      openai: { promptCacheKey: hashString(systemPrompt) },
+    },
+    tools: {},
+    stopWhen: stepCountIs(15),
+  });
+}
+
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
@@ -36,17 +50,10 @@ export async function POST(req: Request) {
     userName: "Anonymous",
   });
 
-  const result = streamText({
-    model: openai.chat(modelId),
-    messages: await convertToModelMessages(messages),
-    providerOptions: {
-      anthropic: { cacheControl: { type: "ephemeral" } },
-      openai: { promptCacheKey: hashString(systemPrompt) },
-    },
-    system: systemPrompt,
-    tools: {},
-    stopWhen: stepCountIs(15),
-  });
+  const agent = createChatAgent(systemPrompt, modelId);
 
-  return result.toUIMessageStreamResponse();
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages: messages,
+  });
 }

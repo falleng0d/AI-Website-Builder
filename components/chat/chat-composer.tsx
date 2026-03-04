@@ -11,6 +11,7 @@ type ChatComposerProps = {
   isRunning: boolean;
   hasMessages: boolean;
   error: Error | undefined;
+  focusRequestToken: number;
   onInputChangeAction: (value: string) => void;
   onSubmitAction: () => Promise<void>;
   onClearAction: () => void;
@@ -22,12 +23,24 @@ export function ChatComposer({
   isRunning,
   hasMessages,
   error,
+  focusRequestToken,
   onInputChangeAction,
   onSubmitAction,
   onClearAction,
   onStopAction,
 }: ChatComposerProps) {
   const textAreaInputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (focusRequestToken === 0) return;
+
+    const textarea = textAreaInputRef.current;
+    if (!textarea) return;
+
+    textarea.focus();
+    const textLength = textarea.value.length;
+    textarea.setSelectionRange(textLength, textLength);
+  }, [focusRequestToken]);
 
   return (
     <div className="border-t border-border/70 bg-background/85 p-3">
