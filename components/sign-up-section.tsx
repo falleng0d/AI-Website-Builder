@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { JSX, SVGProps } from "react";
 import SignUpForm from "./sign-up-form";
+import { GithubIcon } from "lucide-react";
 
 const GoogleIcon = (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
   <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
@@ -35,8 +36,8 @@ export default function SignUpSection() {
           </p>
           <div className="mt-8">
             <Button variant="outline" className="w-full" onClick={signInWithGithub}>
-              <GoogleIcon className="size-4" aria-hidden={true} />
-              Login with Google
+              <GithubIcon className="size-4" aria-hidden={true} />
+              Login with Github
             </Button>
           </div>
 
