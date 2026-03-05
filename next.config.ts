@@ -1,4 +1,12 @@
 import type { NextConfig } from "next";
+import { env } from "./lib/env";
+
+const hostname = env["HOSTNAME"];
+const allowedDevOrigins = ["localhost:3000"];
+
+if (hostname) {
+  allowedDevOrigins.push(`${hostname}`);
+}
 
 const nextConfig: NextConfig = {
   images: {
@@ -10,6 +18,7 @@ const nextConfig: NextConfig = {
     ],
   },
   reactStrictMode: true,
+  allowedDevOrigins: allowedDevOrigins,
   headers: async () => {
     return [
       {
