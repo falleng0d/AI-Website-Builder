@@ -1,6 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { cjk } from "@streamdown/cjk";
+import { code } from "@streamdown/code";
+import { math } from "@streamdown/math";
+import { mermaid } from "@streamdown/mermaid";
 import type { UIMessage } from "ai";
 import { Bot, Loader2, User2 } from "lucide-react";
 import type { RefObject } from "react";
@@ -33,7 +37,9 @@ export function ChatMessageList({ messages, isRunning, bottomRef }: ChatMessageL
                 {isUser ? <User2 className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
                 <span>{isUser ? "You" : "Assistant"}</span>
               </div>
-              <Streamdown>{getMessageText(message)}</Streamdown>
+              <Streamdown plugins={{ code, mermaid, math, cjk }} isAnimating={isRunning && !isUser}>
+                {getMessageText(message)}
+              </Streamdown>
             </div>
           </div>
         );
