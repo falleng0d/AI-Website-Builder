@@ -4,7 +4,7 @@ import { openai } from "@/lib/openai";
 
 export interface ChatAgentContext {
   userName?: string;
-  chatId?: string;
+  threadId?: string;
 }
 
 interface CreateChatAgentOptions {
@@ -34,7 +34,7 @@ export function buildChatSystemPrompt(context: ChatAgentContext = {}): string {
 
 export function createChatAgent({ modelId, context = {} }: CreateChatAgentOptions): ToolLoopAgent {
   const systemPrompt = buildChatSystemPrompt(context);
-  const promptCacheKey = context.chatId?.trim() || hashString(systemPrompt);
+  const promptCacheKey = context.threadId?.trim() || hashString(systemPrompt);
 
   return new ToolLoopAgent({
     id: "chat-route-agent",
