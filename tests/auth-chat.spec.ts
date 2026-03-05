@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-test.setTimeout(10000);
+test.setTimeout(30000);
 
 const actionTimeout = 10000;
 const overlayPollIntervalMs = 200;
@@ -121,7 +121,29 @@ test("login/create user, send hi then how are you, and screenshot result", async
       (async () => {
         await page.goto("/chat");
 
-        // TODO
+        const promptInput = page.getByPlaceholder("Describe your design...");
+        const sendButton = page.getByRole("button", { name: "Send" });
+        const thinkingIndicator = page.getByText("Assistant is thinking...");
+
+        await expect(promptInput).toBeVisible({ timeout: actionTimeout });
+        await expect(sendButton).toBeDisabled();
+
+        await promptInput.fill("hi");
+        await expect(sendButton).toBeEnabled();
+        await sendButton.click();
+        await expect(page.getByText("hi", { exact: true })).toBeVisible({ timeout: actionTimeout });
+        await expect(thinkingIndicator).toBeVisible({ timeout: actionTimeout });
+        await expect(thinkingIndicator).not.toBeVisible({ timeout: actionTimeout });
+
+        await promptInput.fill("how are you");
+        await expect(sendButton).toBeEnabled();
+        await sendButton.click();
+        await expect(page.getByText("how are you", { exact: true })).toBeVisible({ timeout: actionTimeout });
+        await expect(thinkingIndicator).toBeVisible({ timeout: actionTimeout });
+        await expect(thinkingIndicator).not.toBeVisible({ timeout: actionTimeout });
+        await expect
+          .poll(async () => page.locator("span", { hasText: "Assistant" }).count(), { timeout: actionTimeout })
+          .toBeGreaterThanOrEqual(2);
 
         await page.waitForTimeout(2000);
         await page.screenshot({ path: testInfo.outputPath("chat-after-hi.png"), fullPage: true });
