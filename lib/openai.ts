@@ -11,7 +11,7 @@ export const openai = createOpenAI({
 });
 
 export async function listModels(): Promise<ModelsList> {
-  const response = await fetch(`${openai}/models`, {
+  const response = await fetch(`${openaiBaseUrl}/models`, {
     headers: {
       Authorization: `Bearer ${openaiApiKey}`,
     },
