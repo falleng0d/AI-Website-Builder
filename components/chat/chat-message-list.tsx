@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
 import { Bot, Loader2, User2 } from "lucide-react";
 import type { RefObject } from "react";
+import { Streamdown } from "streamdown";
 import { getMessageText } from "./chat-types";
 
 type ChatMessageListProps = {
@@ -32,7 +33,7 @@ export function ChatMessageList({ messages, isRunning, bottomRef }: ChatMessageL
                 {isUser ? <User2 className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
                 <span>{isUser ? "You" : "Assistant"}</span>
               </div>
-              <p className="whitespace-pre-wrap">{getMessageText(message)}</p>
+              <Streamdown>{getMessageText(message)}</Streamdown>
             </div>
           </div>
         );
