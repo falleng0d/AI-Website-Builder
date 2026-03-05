@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test:e2e": "playwright test",
+    "test:e2e:debug": "playwright test --debug",
     "format": "prettier --write .",
     "postinstall": "prisma generate",
     "db:clean": "prisma migrate reset --force",
@@ -52,6 +54,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.4",
     "@next/env": "^16.1.6",
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/node": "^22.19.13",
     "@types/react": "^19.2.14",

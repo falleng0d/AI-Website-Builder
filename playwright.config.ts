@@ -8,6 +8,7 @@ export default defineConfig({
   testDir: "./tests",
   fullyParallel: false,
   retries: 1,
+  maxFailures: 1,
   use: {
     baseURL,
     ignoreHTTPSErrors: true,
