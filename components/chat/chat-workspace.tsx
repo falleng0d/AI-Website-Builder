@@ -2,34 +2,54 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { ChatConfigService } from "@/lib/chat-config";
-import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
+import { usePersistedState } from "@/lib/chat-config";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatPreviewPanel } from "./chat-preview-panel";
 import { ChatResizeHandle } from "./chat-resize-handle";
 import { ChatSidebar } from "./chat-sidebar";
 import { ChatTopBar } from "./chat-top-bar";
+import { useResizable } from "@/hooks/use-resizable";
+import { z } from "zod";
+import { ModelOption } from "@/hooks/use-chat-models";
+import { User } from "@/lib/types";
 
 const SIDEBAR_MIN_WIDTH = 320;
 const SIDEBAR_MAX_WIDTH_RATIO = 0.7;
 const PREVIEW_MIN_WIDTH = 320;
 
-const clampSidebarWidth = (width: number, containerWidth: number): number => {
-  const maxWidth = Math.max(
-    SIDEBAR_MIN_WIDTH,
-    Math.min(containerWidth * SIDEBAR_MAX_WIDTH_RATIO, containerWidth - PREVIEW_MIN_WIDTH),
-  );
+const showSidebarSchema = z.coerce.boolean().default(true);
+const sidebarWidthSchema = z.coerce.number().min(320).max(1100).default(420);
 
-  return Math.min(Math.max(width, SIDEBAR_MIN_WIDTH), maxWidth);
-};
+interface ChatWorkspaceProps {
+  models: readonly ModelOption[];
+  defaultModelId: string;
+  user?: User;
+}
 
-export function ChatWorkspace() {
+export function ChatWorkspace(props: ChatWorkspaceProps) {
   const [inputText, setInputText] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(ChatConfigService.defaultConfig.showSidebar);
-  const [isResizing, setIsResizing] = useState(false);
-  const [sidebarWidth, setSidebarWidth] = useState(ChatConfigService.defaultConfig.sidebarWidth);
+  const [showSidebar, setShowSidebar] = usePersistedState("showSidebar", showSidebarSchema);
+  const [sidebarWidth, setSidebarWidth] = usePersistedState("sidebarWidth", sidebarWidthSchema);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  const resolvedSidebarWidth = hasMounted ? sidebarWidth : sidebarWidthSchema.parse(undefined);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const { isResizing, handleResizeStart, handleResizeReset } = useResizable({
+    containerRef,
+    setWidth: setSidebarWidth,
+    minWidth: SIDEBAR_MIN_WIDTH,
+    maxWidthRatio: SIDEBAR_MAX_WIDTH_RATIO,
+    otherPaneMinWidth: PREVIEW_MIN_WIDTH,
+    defaultWidth: sidebarWidthSchema.parse(undefined),
+    disabled: !showSidebar,
+  });
 
   const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
 
@@ -45,59 +65,6 @@ export function ChatWorkspace() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [visibleMessages.length, status]);
 
-  useEffect(() => {
-    if (!isResizing) return;
-
-    const previousCursor = document.body.style.cursor;
-    const previousUserSelect = document.body.style.userSelect;
-
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-
-    return () => {
-      document.body.style.cursor = previousCursor;
-      document.body.style.userSelect = previousUserSelect;
-    };
-  }, [isResizing]);
-
-  useEffect(() => {
-    const config = ChatConfigService.loadConfig();
-    setIsSidebarOpen(config.showSidebar);
-    setSidebarWidth(config.sidebarWidth);
-  }, []);
-
-  useEffect(() => {
-    ChatConfigService.saveConfig({ showSidebar: isSidebarOpen });
-  }, [isSidebarOpen]);
-
-  useEffect(() => {
-    ChatConfigService.saveConfig({ sidebarWidth });
-  }, [sidebarWidth]);
-
-  useEffect(() => {
-    const clampToContainer = () => {
-      const container = containerRef.current;
-      if (!container) return;
-
-      setSidebarWidth((currentWidth) => {
-        const nextWidth = clampSidebarWidth(currentWidth, container.getBoundingClientRect().width);
-
-        if (nextWidth === currentWidth) {
-          return currentWidth;
-        }
-
-        return nextWidth;
-      });
-    };
-
-    clampToContainer();
-    window.addEventListener("resize", clampToContainer);
-
-    return () => {
-      window.removeEventListener("resize", clampToContainer);
-    };
-  }, []);
-
   const submitPrompt = async (prompt: string) => {
     const trimmed = prompt.trim();
     if (!trimmed || isRunning) return;
@@ -106,51 +73,14 @@ export function ChatWorkspace() {
     await sendMessage({ text: trimmed });
   };
 
-  const handleResizeStart = (event: PointerEvent<HTMLDivElement>) => {
-    if (!isSidebarOpen) return;
-
-    const container = containerRef.current;
-    if (!container) return;
-
-    event.preventDefault();
-    setIsResizing(true);
-
-    const bounds = container.getBoundingClientRect();
-
-    const onPointerMove = (moveEvent: globalThis.PointerEvent) => {
-      const nextWidth = moveEvent.clientX - bounds.left;
-      const clampedWidth = clampSidebarWidth(nextWidth, bounds.width);
-      setSidebarWidth(clampedWidth);
-    };
-
-    const onPointerUp = () => {
-      setIsResizing(false);
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-    };
-
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-  };
-
-  const handleResizeReset = () => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const defaultWidth = ChatConfigService.defaultConfig.sidebarWidth;
-    const nextWidth = clampSidebarWidth(defaultWidth, container.getBoundingClientRect().width);
-
-    setSidebarWidth(nextWidth);
-  };
-
   return (
     <div className="flex h-screen flex-col bg-background">
-      <ChatTopBar isSidebarOpen={isSidebarOpen} onToggleSidebarAction={() => setIsSidebarOpen((value) => !value)} />
+      <ChatTopBar isSidebarOpen={showSidebar} onToggleSidebarAction={() => setShowSidebar(!showSidebar)} />
 
       <div ref={containerRef} className="flex min-h-0 flex-1">
         <ChatSidebar
-          isOpen={isSidebarOpen}
-          width={sidebarWidth}
+          isOpen={showSidebar}
+          width={resolvedSidebarWidth}
           isResizing={isResizing}
           messages={visibleMessages}
           isRunning={isRunning}
@@ -164,12 +94,12 @@ export function ChatWorkspace() {
         />
 
         <ChatResizeHandle
-          isVisible={isSidebarOpen}
+          isVisible={showSidebar}
           onPointerDownAction={handleResizeStart}
           onDoubleClickAction={handleResizeReset}
         />
 
-        <ChatPreviewPanel isSidebarOpen={isSidebarOpen} />
+        <ChatPreviewPanel isSidebarOpen={showSidebar} />
       </div>
     </div>
   );
