@@ -1,6 +1,7 @@
 import { ToolLoopAgent, stepCountIs } from "ai";
 import { createHash } from "node:crypto";
 import { openai } from "@/lib/openai";
+import { toolkit } from "@/lib/tools/toolkit";
 
 export interface ChatAgentContext {
   userName?: string;
@@ -44,7 +45,7 @@ export function createChatAgent({ modelId, context = {} }: CreateChatAgentOption
       anthropic: { cacheControl: { type: "ephemeral" } },
       openai: { promptCacheKey },
     },
-    tools: {},
+    tools: toolkit,
     stopWhen: stepCountIs(15),
   });
 }
