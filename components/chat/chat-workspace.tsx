@@ -69,6 +69,7 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
 
   const { messages, sendMessage, status, error, stop, setMessages } = useChat({
     transport,
+    experimental_throttle: 50,
   });
 
   useEffect(() => {
