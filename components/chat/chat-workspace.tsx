@@ -4,7 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { usePersistedState } from "@/lib/chat-config";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { GeneratedUIProvider } from "@/context/GeneratedUIContext";
+import { GeneratedUIProvider, useGeneratedUIContext } from "@/context/GeneratedUIContext";
 import { ChatPreviewPanel } from "./chat-preview-panel";
 import { ChatResizeHandle } from "./chat-resize-handle";
 import { ChatSidebar } from "./chat-sidebar";
@@ -79,6 +79,7 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
   }, [error]);
 
   const { spec: currentUISpec } = useGeneratedUI(messages);
+  const { clearSpec } = useGeneratedUIContext();
 
   const visibleMessages = useMemo(() => messages.filter((message) => message.role !== "system"), [messages]);
 
@@ -98,7 +99,11 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <ChatTopBar isSidebarOpen={showSidebar} onToggleSidebarAction={() => setShowSidebar(!showSidebar)} />
+      <ChatTopBar
+        isSidebarOpen={showSidebar}
+        onToggleSidebarAction={() => setShowSidebar(!showSidebar)}
+        onClearUIAction={clearSpec}
+      />
 
       <div ref={containerRef} className="flex min-h-0 flex-1">
         <ChatSidebar
