@@ -14,6 +14,7 @@ import { useGeneratedUI } from "@/hooks/use-generated-ui";
 import { z } from "zod";
 import { ModelOption } from "@/hooks/use-chat-models";
 import { User } from "@/lib/types";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const SIDEBAR_MIN_WIDTH = 320;
 const SIDEBAR_MAX_WIDTH_RATIO = 0.7;
@@ -30,17 +31,11 @@ interface ChatWorkspaceProps {
 
 function ChatWorkspaceInner(props: ChatWorkspaceProps) {
   const [inputText, setInputText] = useState("");
+  const [errorDismissed, setErrorDismissed] = useState(false);
   const selectedModelSchema = useMemo(() => z.string().min(1).default(props.defaultModelId), [props.defaultModelId]);
   const [showSidebar, setShowSidebar] = usePersistedState("showSidebar", showSidebarSchema);
   const [sidebarWidth, setSidebarWidth] = usePersistedState("sidebarWidth", sidebarWidthSchema);
   const [selectedModelId, setSelectedModelId] = usePersistedState("selectedModelId", selectedModelSchema);
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  const resolvedSidebarWidth = hasMounted ? sidebarWidth : sidebarWidthSchema.parse(undefined);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -69,12 +64,18 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
         api: "/api/chat",
         body: { modelId: selectedModelId },
       }),
-    [selectedModelId]
+    [selectedModelId],
   );
 
   const { messages, sendMessage, status, error, stop, setMessages } = useChat({
     transport,
   });
+
+  useEffect(() => {
+    if (error) {
+      setErrorDismissed(false);
+    }
+  }, [error]);
 
   useGeneratedUI(messages);
 
@@ -101,14 +102,13 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
       <div ref={containerRef} className="flex min-h-0 flex-1">
         <ChatSidebar
           isOpen={showSidebar}
-          width={resolvedSidebarWidth}
+          width={sidebarWidth}
           isResizing={isResizing}
           models={availableModels}
           selectedModelId={selectedModelId}
           messages={visibleMessages}
           isRunning={isRunning}
           inputText={inputText}
-          error={error}
           bottomRef={bottomRef}
           onSelectModelAction={setSelectedModelId}
           onInputChangeAction={setInputText}
@@ -125,6 +125,17 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
 
         <ChatPreviewPanel isSidebarOpen={showSidebar} />
       </div>
+
+      {error && !errorDismissed ? (
+        <Dialog open={true} onOpenChange={(open) => !open && setErrorDismissed(true)}>
+          <DialogContent className="sm:max-w-md" data-testid="chat-composer-error">
+            <DialogHeader>
+              <DialogTitle className="text-destructive">Error</DialogTitle>
+              <DialogDescription className="pt-2 text-destructive/80">{error.message}</DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </div>
   );
 }

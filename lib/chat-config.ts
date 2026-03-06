@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useCallback, useMemo, useState, type Dispatch, type SetStateAction, useEffect } from "react";
 import { z } from "zod";
 
 const STORAGE_KEY = "chat-workspace-config";
@@ -50,7 +50,11 @@ export function usePersistedState<TSchema extends z.ZodTypeAny>(
   schemaWithDefaultValue: TSchema,
 ): [z.infer<TSchema>, Dispatch<SetStateAction<z.infer<TSchema>>>] {
   const defaultValue = useMemo(() => schemaWithDefaultValue.parse(undefined), [schemaWithDefaultValue]);
-  const [state, setState] = useState<z.infer<TSchema>>(() => loadPersistedValue(key, schemaWithDefaultValue, defaultValue));
+  const [state, setState] = useState<z.infer<TSchema>>(schemaWithDefaultValue.parse(undefined));
+
+  useEffect(() => {
+    setState(loadPersistedValue(key, schemaWithDefaultValue, defaultValue));
+  }, []);
 
   const setPersistedState = useCallback<Dispatch<SetStateAction<z.infer<TSchema>>>>(
     (value) => {

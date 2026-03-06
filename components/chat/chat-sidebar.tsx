@@ -18,7 +18,6 @@ type ChatSidebarProps = {
   messages: readonly UIMessage[];
   isRunning: boolean;
   inputText: string;
-  error?: Error;
   bottomRef: RefObject<HTMLDivElement | null>;
   onSelectModelAction: (modelId: string) => void;
   onInputChangeAction: (value: string) => void;
@@ -36,7 +35,6 @@ export function ChatSidebar({
   messages,
   isRunning,
   inputText,
-  error,
   bottomRef,
   onSelectModelAction,
   onInputChangeAction,
@@ -90,7 +88,6 @@ export function ChatSidebar({
         inputText={inputText}
         isRunning={isRunning}
         hasMessages={hasMessages}
-        error={error}
         focusRequestToken={focusRequestToken}
         onSelectModelAction={onSelectModelAction}
         onInputChangeAction={onInputChangeAction}

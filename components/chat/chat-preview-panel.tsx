@@ -24,9 +24,7 @@ function EmptyPreview() {
       <div className="relative mx-6 flex max-w-md flex-col items-center rounded-2xl border border-dashed border-border/80 bg-background/85 px-6 py-7 text-center shadow-sm">
         <Sparkles className="mb-2 h-5 w-5 text-primary" />
         <p className="text-sm font-semibold">Live Preview</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Ask the assistant to build a UI and it will appear here.
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">Ask the assistant to build a UI and it will appear here.</p>
       </div>
     </>
   );
