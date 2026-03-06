@@ -1,7 +1,8 @@
-import type { UIMessage } from "ai";
+import type { DynamicToolUIPart, ToolUIPart, UIMessage } from "ai";
 
-type MessagePart = UIMessage["parts"][number];
-type TextPart = Extract<MessagePart, { type: "text" }>;
+export type MessagePart = UIMessage["parts"][number];
+export type TextPart = Extract<MessagePart, { type: "text" }>;
+export type ToolPart = ToolUIPart | DynamicToolUIPart;
 
 export const CHAT_STARTER_PROMPTS = [
   "Build a modern landing page for a SaaS product with pricing cards.",
@@ -9,8 +10,16 @@ export const CHAT_STARTER_PROMPTS = [
   "Create a restaurant website with menu sections and a reservation call-to-action.",
 ];
 
+export function isTextPart(part: MessagePart): part is TextPart {
+  return part.type === "text";
+}
+
+export function isToolPart(part: MessagePart): part is ToolPart {
+  return part.type === "dynamic-tool" || part.type.startsWith("tool-");
+}
+
 export function getMessageText(message: UIMessage): string {
-  const textParts = message.parts.filter((part): part is TextPart => part.type === "text");
+  const textParts = message.parts.filter(isTextPart);
 
   const text = textParts
     .map((part) => part.text)
