@@ -41,7 +41,7 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
   const [showSidebar, setShowSidebar] = usePersistedState("showSidebar", showSidebarSchema);
   const [sidebarWidth, setSidebarWidth] = usePersistedState("sidebarWidth", sidebarWidthSchema);
   const [selectedModelId, setSelectedModelId] = usePersistedState("selectedModelId", selectedModelSchema);
-  const [showComponentTree, setShowComponentTree] = usePersistedState("showComponentTree", z.coerce.boolean().default(false));
+  const [showComponentTree, setShowComponentTree] = usePersistedState("showComponentTree", z.coerce.boolean().default(true));
 
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
