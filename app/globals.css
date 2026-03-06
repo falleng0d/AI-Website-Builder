@@ -160,4 +160,29 @@
   .container {
     @apply mx-auto max-w-screen p-8;
   }
+
+  .chat-sidebar-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sidebar-border) transparent;
+  }
+
+  .chat-sidebar-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .chat-sidebar-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .chat-sidebar-scrollbar::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background-color: var(--sidebar-border);
+    background-clip: content-box;
+  }
+
+  .chat-sidebar-scrollbar:hover::-webkit-scrollbar-thumb {
+    background-color: var(--sidebar-accent);
+  }
 }

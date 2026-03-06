@@ -54,7 +54,7 @@ export function ChatSidebar({
       )}
       style={{ "--chat-sidebar-width": `${width}px` } as CSSProperties}
     >
-      <div className="flex-1 space-y-4 overflow-y-auto p-4">
+      <div className="chat-sidebar-scrollbar flex-1 space-y-4 overflow-y-auto p-4">
         {!hasMessages ? (
           <div className="space-y-4">
             <div className="rounded-2xl border border-border/70 bg-background/80 p-4">
