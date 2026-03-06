@@ -66,6 +66,32 @@ function createOverlayGuard(page: Page) {
   };
 }
 
+function createErrorDialogGuard(page: Page) {
+  let isActive = true;
+  const errorDialog = page.locator('[data-testid="chat-composer-error"]');
+
+  const guard = (async () => {
+    while (isActive) {
+      const hasError = await errorDialog.isVisible().catch(() => false);
+      if (hasError) {
+        const errorText = await errorDialog.innerText().catch(() => "Unable to read error dialog content.");
+        console.error("[e2e] Error dialog detected. Terminating test.");
+        console.error(`[e2e] Error dialog content:\n${errorText}`);
+        throw new Error("Detected error dialog.");
+      }
+
+      await page.waitForTimeout(overlayPollIntervalMs);
+    }
+  })();
+
+  return {
+    guard,
+    stop: () => {
+      isActive = false;
+    },
+  };
+}
+
 async function signIn(page: Page) {
   await page.goto("/sign-in", { waitUntil: "domcontentloaded" });
   const emailInput = page.getByPlaceholder("m@example.com");
@@ -114,10 +140,12 @@ test("login/create user, send hi then how are you, and screenshot result", async
   await ensureAuthenticated(page);
 
   const overlayGuard = createOverlayGuard(page);
+  const errorDialogGuard = createErrorDialogGuard(page);
 
   try {
     await Promise.race([
       overlayGuard.guard,
+      errorDialogGuard.guard,
       (async () => {
         await page.goto("/chat");
 
@@ -151,6 +179,8 @@ test("login/create user, send hi then how are you, and screenshot result", async
     ]);
   } finally {
     overlayGuard.stop();
+    errorDialogGuard.stop();
     await overlayGuard.guard.catch(() => undefined);
+    await errorDialogGuard.guard.catch(() => undefined);
   }
 });

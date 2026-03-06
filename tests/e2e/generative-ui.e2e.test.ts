@@ -67,6 +67,32 @@ function createOverlayGuard(page: Page) {
   };
 }
 
+function createErrorDialogGuard(page: Page) {
+  let isActive = true;
+  const errorDialog = page.locator('[data-testid="chat-composer-error"]');
+
+  const guard = (async () => {
+    while (isActive) {
+      const hasError = await errorDialog.isVisible().catch(() => false);
+      if (hasError) {
+        const errorText = await errorDialog.innerText().catch(() => "Unable to read error dialog content.");
+        console.error("[e2e] Error dialog detected. Terminating test.");
+        console.error(`[e2e] Error dialog content:\n${errorText}`);
+        throw new Error("Detected error dialog.");
+      }
+
+      await page.waitForTimeout(overlayPollIntervalMs);
+    }
+  })();
+
+  return {
+    guard,
+    stop: () => {
+      isActive = false;
+    },
+  };
+}
+
 async function signIn(page: Page) {
   await page.goto("/sign-in", { waitUntil: "domcontentloaded" });
   const emailInput = page.getByPlaceholder("m@example.com");
@@ -115,10 +141,12 @@ test("agent generates UI that renders in the preview panel", async ({ page }, te
   await ensureAuthenticated(page);
 
   const overlayGuard = createOverlayGuard(page);
+  const errorDialogGuard = createErrorDialogGuard(page);
 
   try {
     await Promise.race([
       overlayGuard.guard,
+      errorDialogGuard.guard,
       (async () => {
         await page.goto("/chat");
 
@@ -135,13 +163,13 @@ test("agent generates UI that renders in the preview panel", async ({ page }, te
 
         // Send a prompt requesting UI generation
         await promptInput.fill(
-          'Create a simple card with a heading that says "Hello World" and a text paragraph that says "This is a test"'
+          'Create a simple card with a heading that says "Hello World" and a text paragraph that says "This is a test"',
         );
         await expect(sendButton).toBeEnabled();
         await sendButton.click();
 
         // Wait for the user message to appear
-        await expect(page.getByText('Create a simple card with a heading')).toBeVisible({ timeout: actionTimeout });
+        await expect(page.getByText("Create a simple card with a heading")).toBeVisible({ timeout: actionTimeout });
 
         // Wait for the preview panel to show rendered content (the agent must call set_ui)
         const previewContent = page.getByTestId("preview-content");
@@ -156,6 +184,8 @@ test("agent generates UI that renders in the preview panel", async ({ page }, te
     ]);
   } finally {
     overlayGuard.stop();
+    errorDialogGuard.stop();
     await overlayGuard.guard.catch(() => undefined);
+    await errorDialogGuard.guard.catch(() => undefined);
   }
 });
