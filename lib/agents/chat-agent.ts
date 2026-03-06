@@ -8,6 +8,7 @@ import { toolkit } from "@/lib/tools/toolkit";
 export interface ChatAgentContext {
   userName?: string;
   threadId?: string;
+  previewTheme?: "light" | "dark";
 }
 
 interface CreateChatAgentOptions {
@@ -45,6 +46,11 @@ export function buildChatSystemPrompt(context: ChatAgentContext = {}): string {
   if (context.userName) {
     sections.push("");
     sections.push(`You are chatting with: ${context.userName}`);
+  }
+
+  if (context.previewTheme) {
+    sections.push("");
+    sections.push(`Generated UI is rendered in a separate preview surface using the ${context.previewTheme} theme.`);
   }
 
   return sections.join("\n");

@@ -18,7 +18,7 @@ export default function HeroSection() {
         </FadeInView>
         <FadeInView delay={0.2} className="text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">
           AI Website Builder <br />
-          <span className="bg-gradient-to-r from-primary bg-clip-text px-2 text-transparent">Starter Template</span>
+          <span className="px-2 text-primary mix-blend-difference">Create your website with AI</span>
         </FadeInView>
         <FadeInView delay={0.4} className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8">
           A complete, open-source website builder that lets you build and update your site by just talking to AI in your own

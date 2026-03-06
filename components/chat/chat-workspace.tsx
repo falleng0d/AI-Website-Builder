@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 const SIDEBAR_MIN_WIDTH = 320;
 const SIDEBAR_MAX_WIDTH_RATIO = 0.7;
 const PREVIEW_MIN_WIDTH = 320;
+const PREVIEW_THEME = "light" as const;
 
 const showSidebarSchema = z.coerce.boolean().default(true);
 const sidebarWidthSchema = z.coerce.number().min(320).max(1100).default(420);
@@ -94,7 +95,7 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
     if (!trimmed || isRunning) return;
 
     setInputText("");
-    await sendMessage({ text: trimmed }, { body: { modelId: selectedModelId, currentUISpec } });
+    await sendMessage({ text: trimmed }, { body: { modelId: selectedModelId, currentUISpec, previewTheme: PREVIEW_THEME } });
   };
 
   return (

@@ -42,7 +42,9 @@ export default function TechStackSection() {
     <section className="container mx-auto pt-20 pb-20 md:pt-32 md:pb-32">
       <FadeInView className="mx-auto max-w-4xl space-y-4 pb-16 text-center">
         <Badge className="px-4 py-1.5 text-sm font-medium">Tech Stack</Badge>
-        <h2 className="mx-auto mt-4 text-3xl font-bold tracking-tight sm:text-5xl">Powered by Modern Technology</h2>
+        <h2 className="mx-auto mt-4 text-3xl font-bold tracking-tight sm:text-5xl">
+          Next.js 16 + Tailwind CSS + Shadcn UI + Better-Auth + Prisma + PostgreSQL
+        </h2>
         <p className="pt-1 text-xl text-muted-foreground"></p>
       </FadeInView>
     </section>

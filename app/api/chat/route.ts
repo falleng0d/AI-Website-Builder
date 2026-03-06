@@ -4,6 +4,8 @@ import type { UISpec } from "@/lib/json-ui/types";
 import { createUITools } from "@/lib/tools/ui-tools";
 import { z } from "zod";
 
+const previewThemeSchema = z.enum(["light", "dark"]);
+
 const elementSchema = z.object({
   type: z.string(),
   props: z.record(z.string(), z.unknown()).default({}),
@@ -21,12 +23,20 @@ export async function POST(req: Request) {
     id: threadId,
     modelId: requestedModelId,
     currentUISpec,
-  }: { messages: UIMessage[]; id?: string; modelId?: string; currentUISpec?: UISpec } = await req.json();
+    previewTheme,
+  }: {
+    messages: UIMessage[];
+    id?: string;
+    modelId?: string;
+    currentUISpec?: unknown;
+    previewTheme?: unknown;
+  } = await req.json();
 
   const defaultModelId = z.string({ error: "DEFAULT_MODEL is required" }).min(1).parse(process.env.DEFAULT_MODEL);
   const parsedThreadId = z.string({ error: "threadId is required" }).min(1).parse(threadId);
   const parsedModelId = z.string().min(1).safeParse(requestedModelId);
   const parsedCurrentUISpec = uiSpecSchema.optional().safeParse(currentUISpec);
+  const parsedPreviewTheme = previewThemeSchema.catch("light").parse(previewTheme);
 
   const uiTools = createUITools(parsedCurrentUISpec.success ? parsedCurrentUISpec.data : undefined);
 
@@ -35,6 +45,7 @@ export async function POST(req: Request) {
     context: {
       userName: "Anonymous",
       threadId: parsedThreadId,
+      previewTheme: parsedPreviewTheme,
     },
     additionalTools: uiTools,
   });
