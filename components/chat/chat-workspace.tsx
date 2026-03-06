@@ -2,9 +2,11 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import { ComponentTreeProvider, useComponentTreeContext } from "@/context/ComponentTreeContext";
 import { usePersistedState } from "@/lib/chat-config";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GeneratedUIProvider, useGeneratedUIContext } from "@/context/GeneratedUIContext";
+import { ComponentTreePanel } from "./component-tree-panel";
 import { ChatPreviewPanel } from "./chat-preview-panel";
 import { ChatResizeHandle } from "./chat-resize-handle";
 import { ChatSidebar } from "./chat-sidebar";
@@ -27,6 +29,7 @@ const sidebarWidthSchema = z.coerce.number().min(320).max(1100).default(420);
 interface ChatWorkspaceProps {
   models: readonly ModelOption[];
   defaultModelId: string;
+  initialSpec?: import("@/lib/json-ui/types").UISpec;
   user?: User;
 }
 
@@ -38,6 +41,7 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
   const [showSidebar, setShowSidebar] = usePersistedState("showSidebar", showSidebarSchema);
   const [sidebarWidth, setSidebarWidth] = usePersistedState("sidebarWidth", sidebarWidthSchema);
   const [selectedModelId, setSelectedModelId] = usePersistedState("selectedModelId", selectedModelSchema);
+  const [showComponentTree, setShowComponentTree] = usePersistedState("showComponentTree", z.coerce.boolean().default(false));
 
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -80,11 +84,19 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
   }, [error]);
 
   const { spec: currentUISpec } = useGeneratedUI(messages);
-  const { clearSpec } = useGeneratedUIContext();
+  const { clearSpec, spec } = useGeneratedUIContext();
+  const { setHoveredElementId } = useComponentTreeContext();
 
   const visibleMessages = useMemo(() => messages.filter((message) => message.role !== "system"), [messages]);
 
   const isRunning = status === "submitted" || status === "streaming";
+  const hasGeneratedUI = Boolean(spec);
+
+  useEffect(() => {
+    if (!hasGeneratedUI) {
+      setHoveredElementId(undefined);
+    }
+  }, [hasGeneratedUI, setHoveredElementId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -102,7 +114,10 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
     <div className="flex h-screen flex-col bg-background">
       <ChatTopBar
         isSidebarOpen={showSidebar}
+        hasGeneratedUI={hasGeneratedUI}
+        isComponentTreeOpen={showComponentTree && hasGeneratedUI}
         onToggleSidebarAction={() => setShowSidebar(!showSidebar)}
+        onToggleComponentTreeAction={() => setShowComponentTree((current) => !current)}
         onClearUIAction={clearSpec}
       />
 
@@ -131,6 +146,8 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
         />
 
         <ChatPreviewPanel isSidebarOpen={showSidebar} />
+
+        {showComponentTree && hasGeneratedUI ? <ComponentTreePanel /> : null}
       </div>
 
       {error && !errorDismissed ? (
@@ -151,8 +168,10 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
 
 export function ChatWorkspace(props: ChatWorkspaceProps) {
   return (
-    <GeneratedUIProvider>
-      <ChatWorkspaceInner {...props} />
+    <GeneratedUIProvider initialSpec={props.initialSpec}>
+      <ComponentTreeProvider>
+        <ChatWorkspaceInner {...props} />
+      </ComponentTreeProvider>
     </GeneratedUIProvider>
   );
 }

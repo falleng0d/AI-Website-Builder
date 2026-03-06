@@ -1,6 +1,7 @@
 export { ChatComposer } from "./chat-composer";
 export { ChatMessageList } from "./chat-message-list";
 export { ChatModelSelector } from "./chat-model-selector";
+export { ComponentTreePanel } from "./component-tree-panel";
 export { ChatPreviewPanel } from "./chat-preview-panel";
 export { ChatResizeHandle } from "./chat-resize-handle";
 export { ChatSendButton } from "./chat-send-button";

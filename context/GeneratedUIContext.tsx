@@ -11,16 +11,12 @@ interface GeneratedUIContextType {
 
 const GeneratedUIContext = createContext<GeneratedUIContextType | undefined>(undefined);
 
-export function GeneratedUIProvider({ children }: { children: ReactNode }) {
-  const [spec, setSpec] = useState<UISpec | undefined>();
+export function GeneratedUIProvider({ children, initialSpec }: { children: ReactNode; initialSpec?: UISpec }) {
+  const [spec, setSpec] = useState<UISpec | undefined>(initialSpec);
 
   const clearSpec = useCallback(() => setSpec(undefined), []);
 
-  return (
-    <GeneratedUIContext.Provider value={{ spec, setSpec, clearSpec }}>
-      {children}
-    </GeneratedUIContext.Provider>
-  );
+  return <GeneratedUIContext.Provider value={{ spec, setSpec, clearSpec }}>{children}</GeneratedUIContext.Provider>;
 }
 
 export function useGeneratedUIContext() {

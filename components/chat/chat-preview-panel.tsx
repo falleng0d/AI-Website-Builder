@@ -1,10 +1,13 @@
 "use client";
 
+import { useComponentTreeContext } from "@/context/ComponentTreeContext";
 import { useGeneratedUIContext } from "@/context/GeneratedUIContext";
+import { createInstrumentedRegistry } from "@/lib/json-ui/component-tree";
 import { registry } from "@/lib/json-ui/registry";
 import { cn } from "@/lib/utils";
 import { ActionProvider, Renderer, StateProvider, VisibilityProvider } from "@json-render/react";
 import { Sparkles } from "lucide-react";
+import { useMemo } from "react";
 
 type ChatPreviewPanelProps = {
   isSidebarOpen: boolean;
@@ -32,6 +35,11 @@ function EmptyPreview() {
 
 export function ChatPreviewPanel({ isSidebarOpen }: ChatPreviewPanelProps) {
   const { spec } = useGeneratedUIContext();
+  const { hoveredElementId } = useComponentTreeContext();
+  const previewRegistry = useMemo(() => {
+    if (!spec) return registry;
+    return createInstrumentedRegistry(registry, spec, hoveredElementId);
+  }, [hoveredElementId, spec]);
 
   return (
     <section
@@ -47,7 +55,7 @@ export function ChatPreviewPanel({ isSidebarOpen }: ChatPreviewPanelProps) {
           <StateProvider initialState={{}}>
             <VisibilityProvider>
               <ActionProvider handlers={{}}>
-                <Renderer spec={spec} registry={registry} />
+                <Renderer spec={spec} registry={previewRegistry} />
               </ActionProvider>
             </VisibilityProvider>
           </StateProvider>
