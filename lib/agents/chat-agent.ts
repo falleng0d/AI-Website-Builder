@@ -36,12 +36,7 @@ function readPromptFile(fileName: string): string {
 const UI_SPEC_PROMPT = readPromptFile("ui-spec.md");
 
 export function buildChatSystemPrompt(context: ChatAgentContext = {}): string {
-  const sections: string[] = [
-    "You are a web development assistant that can build UI designs.",
-    "You can answer in Markdown since the chat interface supports it.",
-    "",
-    UI_SPEC_PROMPT,
-  ];
+  const sections: string[] = [UI_SPEC_PROMPT];
 
   if (context.userName) {
     sections.push("");
