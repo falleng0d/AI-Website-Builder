@@ -14,6 +14,7 @@ import {
 } from "@/components/ai-elements/model-selector";
 import { Button } from "@/components/ui/button";
 import type { ModelOption } from "@/hooks/use-chat-models";
+import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -21,6 +22,7 @@ type ChatModelSelectorProps = {
   models: readonly ModelOption[];
   selectedModelId: string;
   disabled?: boolean;
+  className?: string;
   onSelectModelAction: (modelId: string) => void;
 };
 
@@ -29,7 +31,13 @@ function getModelProvider(modelId: string): string | undefined {
   return match?.[1]?.toLowerCase();
 }
 
-export function ChatModelSelector({ models, selectedModelId, disabled, onSelectModelAction }: ChatModelSelectorProps) {
+export function ChatModelSelector({
+  models,
+  selectedModelId,
+  disabled,
+  className,
+  onSelectModelAction,
+}: ChatModelSelectorProps) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -52,7 +60,11 @@ export function ChatModelSelector({ models, selectedModelId, disabled, onSelectM
   return (
     <ModelSelector onOpenChange={setOpen} open={open}>
       <ModelSelectorTrigger asChild>
-        <Button className="max-w-[min(18vw,22rem)] justify-between gap-2" disabled={disabled} variant="outline">
+        <Button
+          className={cn("max-w-[min(18vw,22rem)] min-w-0 justify-between gap-2", className)}
+          disabled={disabled}
+          variant="outline"
+        >
           <span className="flex min-w-0 items-center gap-2">
             {selectedProvider ? (
               <ModelSelectorLogo

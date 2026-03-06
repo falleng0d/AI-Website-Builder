@@ -72,13 +72,13 @@ export function ChatComposer({
             }
           }}
         />
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button type="button" variant="ghost" onClick={onClearAction} disabled={!hasMessages || isRunning}>
             <Trash2 className="h-4 w-4" />
             Clear
           </Button>
 
-          <div className="flex items-center gap-2">
+          <div className="ml-auto flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
             {isRunning ? (
               <Button type="button" variant="outline" onClick={onStopAction}>
                 <Square className="h-4 w-4" />
@@ -86,6 +86,7 @@ export function ChatComposer({
               </Button>
             ) : null}
             <ChatModelSelector
+              className="flex-1"
               disabled={isRunning}
               models={models}
               onSelectModelAction={onSelectModelAction}
