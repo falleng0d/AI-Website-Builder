@@ -1,17 +1,22 @@
 "use client";
 
+import type { ModelOption } from "@/hooks/use-chat-models";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Square, Trash2 } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { ChatModelSelector } from "./chat-model-selector";
 import { ChatSendButton } from "./chat-send-button";
 
 type ChatComposerProps = {
+  models: readonly ModelOption[];
+  selectedModelId: string;
   inputText: string;
   isRunning: boolean;
   hasMessages: boolean;
   error: Error | undefined;
   focusRequestToken: number;
+  onSelectModelAction: (modelId: string) => void;
   onInputChangeAction: (value: string) => void;
   onSubmitAction: () => Promise<void>;
   onClearAction: () => void;
@@ -19,11 +24,14 @@ type ChatComposerProps = {
 };
 
 export function ChatComposer({
+  models,
+  selectedModelId,
   inputText,
   isRunning,
   hasMessages,
   error,
   focusRequestToken,
+  onSelectModelAction,
   onInputChangeAction,
   onSubmitAction,
   onClearAction,
@@ -77,6 +85,12 @@ export function ChatComposer({
                 Stop
               </Button>
             ) : null}
+            <ChatModelSelector
+              disabled={isRunning}
+              models={models}
+              onSelectModelAction={onSelectModelAction}
+              selectedModelId={selectedModelId}
+            />
             <ChatSendButton disabled={!inputText.trim() || isRunning} />
           </div>
         </div>

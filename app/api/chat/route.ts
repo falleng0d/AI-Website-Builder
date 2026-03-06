@@ -3,13 +3,15 @@ import { createChatAgent } from "@/lib/agents/chat-agent";
 import { z } from "zod";
 
 export async function POST(req: Request) {
-  const { messages, id: threadId }: { messages: UIMessage[]; id?: string } = await req.json();
+  const { messages, id: threadId, modelId: requestedModelId }: { messages: UIMessage[]; id?: string; modelId?: string } =
+    await req.json();
 
-  const modelId = z.string({ error: "DEFAULT_MODEL is required" }).min(1).parse(process.env.DEFAULT_MODEL);
+  const defaultModelId = z.string({ error: "DEFAULT_MODEL is required" }).min(1).parse(process.env.DEFAULT_MODEL);
   const parsedThreadId = z.string({ error: "threadId is required" }).min(1).parse(threadId);
+  const parsedModelId = z.string().min(1).safeParse(requestedModelId);
 
   const agent = createChatAgent({
-    modelId,
+    modelId: parsedModelId.success ? parsedModelId.data : defaultModelId,
     context: {
       userName: "Anonymous",
       threadId: parsedThreadId,

@@ -28,8 +28,10 @@ interface ChatWorkspaceProps {
 
 export function ChatWorkspace(props: ChatWorkspaceProps) {
   const [inputText, setInputText] = useState("");
+  const selectedModelSchema = useMemo(() => z.string().min(1).default(props.defaultModelId), [props.defaultModelId]);
   const [showSidebar, setShowSidebar] = usePersistedState("showSidebar", showSidebarSchema);
   const [sidebarWidth, setSidebarWidth] = usePersistedState("sidebarWidth", sidebarWidthSchema);
+  const [selectedModelId, setSelectedModelId] = usePersistedState("selectedModelId", selectedModelSchema);
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
@@ -51,7 +53,22 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
     disabled: !showSidebar,
   });
 
-  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
+  const availableModels = useMemo(() => {
+    if (props.models.some((model) => model.id === selectedModelId)) {
+      return props.models;
+    }
+
+    return [{ id: selectedModelId, name: selectedModelId }, ...props.models];
+  }, [props.models, selectedModelId]);
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        body: { modelId: selectedModelId },
+      }),
+    [selectedModelId]
+  );
 
   const { messages, sendMessage, status, error, stop, setMessages } = useChat({
     transport,
@@ -82,11 +99,14 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
           isOpen={showSidebar}
           width={resolvedSidebarWidth}
           isResizing={isResizing}
+          models={availableModels}
+          selectedModelId={selectedModelId}
           messages={visibleMessages}
           isRunning={isRunning}
           inputText={inputText}
           error={error}
           bottomRef={bottomRef}
+          onSelectModelAction={setSelectedModelId}
           onInputChangeAction={setInputText}
           onSubmitPromptAction={submitPrompt}
           onClearAction={() => setMessages([])}

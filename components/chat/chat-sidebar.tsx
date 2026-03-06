@@ -1,5 +1,6 @@
 "use client";
 
+import type { ModelOption } from "@/hooks/use-chat-models";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
@@ -12,11 +13,14 @@ type ChatSidebarProps = {
   isOpen: boolean;
   width: number;
   isResizing: boolean;
+  models: readonly ModelOption[];
+  selectedModelId: string;
   messages: readonly UIMessage[];
   isRunning: boolean;
   inputText: string;
   error?: Error;
   bottomRef: RefObject<HTMLDivElement | null>;
+  onSelectModelAction: (modelId: string) => void;
   onInputChangeAction: (value: string) => void;
   onSubmitPromptAction: (prompt: string) => Promise<void>;
   onClearAction: () => void;
@@ -27,11 +31,14 @@ export function ChatSidebar({
   isOpen,
   width,
   isResizing,
+  models,
+  selectedModelId,
   messages,
   isRunning,
   inputText,
   error,
   bottomRef,
+  onSelectModelAction,
   onInputChangeAction,
   onSubmitPromptAction,
   onClearAction,
@@ -78,11 +85,14 @@ export function ChatSidebar({
       </div>
 
       <ChatComposer
+        models={models}
+        selectedModelId={selectedModelId}
         inputText={inputText}
         isRunning={isRunning}
         hasMessages={hasMessages}
         error={error}
         focusRequestToken={focusRequestToken}
+        onSelectModelAction={onSelectModelAction}
         onInputChangeAction={onInputChangeAction}
         onSubmitAction={() => onSubmitPromptAction(inputText)}
         onClearAction={onClearAction}
