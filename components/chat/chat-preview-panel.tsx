@@ -5,7 +5,7 @@ import { useGeneratedUIContext } from "@/context/GeneratedUIContext";
 import { createInstrumentedRegistry } from "@/lib/json-ui/component-tree";
 import { registry } from "@/lib/json-ui/registry";
 import { cn } from "@/lib/utils";
-import { ActionProvider, Renderer, StateProvider, VisibilityProvider } from "@json-render/react";
+import { ActionProvider, Renderer, StateProvider, ValidationProvider, VisibilityProvider } from "@json-render/react";
 import { Sparkles } from "lucide-react";
 import { useMemo } from "react";
 
@@ -54,9 +54,11 @@ export function ChatPreviewPanel({ isSidebarOpen }: ChatPreviewPanelProps) {
         <div className="absolute inset-0 overflow-auto p-6" data-testid="preview-content">
           <StateProvider initialState={{}}>
             <VisibilityProvider>
-              <ActionProvider handlers={{}}>
-                <Renderer spec={spec} registry={previewRegistry} />
-              </ActionProvider>
+              <ValidationProvider>
+                <ActionProvider handlers={{}}>
+                  <Renderer spec={spec} registry={previewRegistry} />
+                </ActionProvider>
+              </ValidationProvider>
             </VisibilityProvider>
           </StateProvider>
         </div>
