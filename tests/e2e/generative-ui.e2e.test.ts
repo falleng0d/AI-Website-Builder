@@ -135,6 +135,29 @@ async function ensureAuthenticated(page: Page) {
   expect(await canAccessDashboard(page)).toBe(true);
 }
 
+async function submitPrompt(page: Page, prompt: string) {
+  const promptInput = page.getByPlaceholder("Describe your design...");
+  const sendButton = page.getByRole("button", { name: "Send" });
+
+  await expect(promptInput).toBeVisible({ timeout: actionTimeout });
+  await promptInput.fill(prompt);
+  await expect(sendButton).toBeEnabled();
+  await sendButton.click();
+  await expect(page.getByText(prompt.slice(0, 40), { exact: false })).toBeVisible({ timeout: actionTimeout });
+}
+
+async function waitForAssistantToSettle(page: Page) {
+  const thinkingIndicator = page.getByText("Assistant is thinking...");
+  await page.waitForTimeout(500);
+
+  if (await thinkingIndicator.isVisible().catch(() => false)) {
+    await expect(thinkingIndicator).not.toBeVisible({ timeout: llmTimeout });
+    return;
+  }
+
+  await page.waitForTimeout(1500);
+}
+
 test("agent generates UI that renders in the preview panel", async ({ page }, testInfo) => {
   setupBrowserLogging(page);
   setupApiErrorLogging(page);
@@ -151,8 +174,6 @@ test("agent generates UI that renders in the preview panel", async ({ page }, te
         await page.goto("/chat");
 
         const promptInput = page.getByPlaceholder("Describe your design...");
-        const sendButton = page.getByRole("button", { name: "Send" });
-        const thinkingIndicator = page.getByText("Assistant is thinking...");
         const previewPanel = page.getByTestId("preview-panel");
 
         await expect(promptInput).toBeVisible({ timeout: actionTimeout });
@@ -162,24 +183,98 @@ test("agent generates UI that renders in the preview panel", async ({ page }, te
         await expect(previewPanel.getByText("Live Preview")).toBeVisible();
 
         // Send a prompt requesting UI generation
-        await promptInput.fill(
+        await submitPrompt(
+          page,
           'Create a simple card with a heading that says "Hello World" and a text paragraph that says "This is a test"',
         );
-        await expect(sendButton).toBeEnabled();
-        await sendButton.click();
-
-        // Wait for the user message to appear
-        await expect(page.getByText("Create a simple card with a heading")).toBeVisible({ timeout: actionTimeout });
 
         // Wait for the preview panel to show rendered content (the agent must call set_ui)
         const previewContent = page.getByTestId("preview-content");
         await expect(previewContent).toBeVisible({ timeout: llmTimeout });
+        await waitForAssistantToSettle(page);
 
         // Verify the empty placeholder is gone
         await expect(previewPanel.getByText("Live Preview")).not.toBeVisible({ timeout: 5000 });
 
         await page.waitForTimeout(1000);
         await page.screenshot({ path: testInfo.outputPath("generative-ui.png"), fullPage: true });
+      })(),
+    ]);
+  } finally {
+    overlayGuard.stop();
+    errorDialogGuard.stop();
+    await overlayGuard.guard.catch(() => undefined);
+    await errorDialogGuard.guard.catch(() => undefined);
+  }
+});
+
+test("agent can inspect and surgically edit generated UI", async ({ page }, testInfo) => {
+  setupBrowserLogging(page);
+  setupApiErrorLogging(page);
+  await ensureAuthenticated(page);
+
+  const overlayGuard = createOverlayGuard(page);
+  const errorDialogGuard = createErrorDialogGuard(page);
+
+  try {
+    await Promise.race([
+      overlayGuard.guard,
+      errorDialogGuard.guard,
+      (async () => {
+        await page.goto("/chat");
+
+        const previewPanel = page.getByTestId("preview-panel");
+        const previewContent = page.getByTestId("preview-content");
+
+        await expect(previewPanel).toBeVisible({ timeout: actionTimeout });
+        await expect(previewPanel.getByText("Live Preview")).toBeVisible();
+
+        await submitPrompt(
+          page,
+          "Create a UI using exact element ids card-1, card-2, card-3, card-4, and card-5. card-1 must be the root Card titled Card1. card-1 has children card-2 and card-4. card-2 has child card-3. card-4 has child card-5. Every card title must match its number label exactly.",
+        );
+
+        await expect(previewContent).toBeVisible({ timeout: llmTimeout });
+        await expect(previewPanel.getByText("Card1")).toBeVisible({ timeout: llmTimeout });
+        await expect(previewPanel.getByText("Card2")).toBeVisible({ timeout: llmTimeout });
+        await expect(previewPanel.getByText("Card5")).toBeVisible({ timeout: llmTimeout });
+        await waitForAssistantToSettle(page);
+
+        await submitPrompt(
+          page,
+          'Use list_ui on path "root" and briefly confirm the hierarchy you find.',
+        );
+
+        await expect(page.getByText("root.card-4.card-5", { exact: false })).toBeVisible({ timeout: llmTimeout });
+        await waitForAssistantToSettle(page);
+
+        await submitPrompt(
+          page,
+          'Use edit_element on path "root.card-2" to change the title to "Card2 Updated" and the description to "Edited through edit_element". Do not replace the whole UI.',
+        );
+
+        await expect(previewPanel.getByText("Card2 Updated")).toBeVisible({ timeout: llmTimeout });
+        await expect(previewPanel.getByText("Edited through edit_element")).toBeVisible({ timeout: llmTimeout });
+        await waitForAssistantToSettle(page);
+
+        await submitPrompt(
+          page,
+          'Use delete_element on path "root.card-4". Do not rebuild the full UI.',
+        );
+
+        await expect(previewPanel.getByText("Card4")).not.toBeVisible({ timeout: llmTimeout });
+        await expect(previewPanel.getByText("Card5")).not.toBeVisible({ timeout: llmTimeout });
+        await waitForAssistantToSettle(page);
+
+        await submitPrompt(
+          page,
+          'Use replace_element on path "root.card-2" to replace it with a new Card subtree whose root id is "replacement-card", title is "Replacement Card", and it has one Text child with id "replacement-copy" and text "Replacement child content".',
+        );
+
+        await expect(previewPanel.getByText("Replacement Card")).toBeVisible({ timeout: llmTimeout });
+        await expect(previewPanel.getByText("Replacement child content")).toBeVisible({ timeout: llmTimeout });
+        await expect(previewPanel.getByText("Card2 Updated")).not.toBeVisible({ timeout: llmTimeout });
+        await page.screenshot({ path: testInfo.outputPath("generative-ui-surgical-editing.png"), fullPage: true });
       })(),
     ]);
   } finally {

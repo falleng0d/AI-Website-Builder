@@ -20,6 +20,8 @@ function hasOutput(part: ToolPart): part is ToolPart & { state: "output-availabl
   return part.state === "output-available";
 }
 
+const SPEC_UPDATING_TOOLS = new Set(["set_ui", "delete_element", "replace_element", "edit_element"]);
+
 /**
  * Watches chat messages for UI tool results and syncs the latest spec
  * into the GeneratedUIContext.
@@ -40,13 +42,13 @@ export function useGeneratedUI(messages: readonly UIMessage[]) {
         if (!isToolPart(part) || !hasOutput(part)) continue;
 
         const toolName = getToolName(part);
-        if (toolName !== "set_ui" && toolName !== "clear_ui") continue;
+        if (!SPEC_UPDATING_TOOLS.has(toolName) && toolName !== "clear_ui") continue;
 
         const resultKey = getToolCallId(part);
         if (lastProcessedRef.current === resultKey) return;
         lastProcessedRef.current = resultKey;
 
-        if (toolName === "set_ui") {
+        if (SPEC_UPDATING_TOOLS.has(toolName)) {
           const result = part.output as { spec?: UISpec };
           if (result?.spec) {
             setSpec(result.spec);
