@@ -28,12 +28,13 @@ services:
       HOSTNAME: 0.0.0.0
       PORT: 3000
       DATABASE_URL: postgresql://postgres:postgres@db:5432/ai-website-builder
-      BETTER_AUTH_URL: http://localhost
+      BETTER_AUTH_URL: http://localhost:8080
     depends_on:
       db:
         condition: service_healthy
     labels:
       - traefik.enable=true
+      - traefik.docker.network=ai_website_builder_web
       - traefik.http.routers.ai-website-builder.rule=PathPrefix(`/`)
       - traefik.http.routers.ai-website-builder.entrypoints=web
       - traefik.http.services.ai-website-builder.loadbalancer.server.port=3000
@@ -64,4 +65,5 @@ volumes:
 
 networks:
   web:
+    name: ai_website_builder_web
   internal:

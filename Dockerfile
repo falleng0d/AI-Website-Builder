@@ -7,8 +7,19 @@ COPY lib/env.ts ./lib/env.ts
 RUN bun install --frozen-lockfile
 
 FROM deps AS builder
+ARG DATABASE_URL=postgresql://postgres:postgres@db:5432/ai-website-builder
+
+# TODO: Ideally this should not be needed, remove once refactoring is complete`
+ARG HOSTNAME=0.0.0.0
+ARG BETTER_AUTH_SECRET="***"
+ARG BETTER_AUTH_URL="***"
+ARG GITHUB_CLIENT_ID="***"
+ARG GITHUB_CLIENT_SECRET="***"
+ARG OPENAI_BASE_URL="***"
+ARG OPENAI_API_KEY="***"
+ARG DEFAULT_MODEL="***"
+
 COPY . .
-RUN bunx next generate
 RUN bunx next build
 
 FROM oven/bun:alpine AS runner
