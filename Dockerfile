@@ -8,7 +8,8 @@ RUN bun install --frozen-lockfile
 
 FROM deps AS builder
 COPY . .
-RUN ./node_modules/.bin/next build
+RUN bunx next generate
+RUN bunx next build
 
 FROM oven/bun:alpine AS runner
 WORKDIR /app
@@ -26,4 +27,4 @@ COPY --from=builder /app/package.json ./package.json
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node ./node_modules/next/dist/bin/next start -H 0.0.0.0 -p 3000"]
+CMD ["sh", "-c", "bunx prisma migrate deploy && bunx next start -H 0.0.0.0 -p 3000"]

@@ -13,3 +13,8 @@ coverage
 playwright-report
 test-results
 *.local
+*.env
+app/(generated)
+/.vercel
+.opencode
+.idea
