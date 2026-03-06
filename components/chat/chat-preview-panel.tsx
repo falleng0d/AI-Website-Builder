@@ -1,13 +1,10 @@
 "use client";
 
-import { ThemeProvider } from "@/components/theme-provider";
 import { useGeneratedUIContext } from "@/context/GeneratedUIContext";
 import { registry } from "@/lib/json-ui/registry";
 import { cn } from "@/lib/utils";
 import { ActionProvider, Renderer, StateProvider, VisibilityProvider } from "@json-render/react";
 import { Sparkles } from "lucide-react";
-
-const PREVIEW_THEME = "light";
 
 type ChatPreviewPanelProps = {
   isSidebarOpen: boolean;
@@ -40,22 +37,21 @@ export function ChatPreviewPanel({ isSidebarOpen }: ChatPreviewPanelProps) {
     <section
       data-testid="preview-panel"
       className={cn(
-        "relative min-h-0 flex-1 items-center justify-center overflow-hidden bg-muted/20",
+        "relative min-h-0 flex-1 items-center justify-center overflow-hidden text-foreground",
+        spec ? "preview-light-theme bg-white" : "bg-muted/20",
         isSidebarOpen ? "hidden md:flex" : "flex",
       )}
     >
       {spec ? (
-        <ThemeProvider attribute="class" defaultTheme={PREVIEW_THEME} enableSystem={false} forcedTheme={PREVIEW_THEME}>
-          <div className="absolute inset-0 overflow-auto p-6" data-testid="preview-content">
-            <StateProvider initialState={{}}>
-              <VisibilityProvider>
-                <ActionProvider handlers={{}}>
-                  <Renderer spec={spec} registry={registry} />
-                </ActionProvider>
-              </VisibilityProvider>
-            </StateProvider>
-          </div>
-        </ThemeProvider>
+        <div className="absolute inset-0 overflow-auto p-6" data-testid="preview-content">
+          <StateProvider initialState={{}}>
+            <VisibilityProvider>
+              <ActionProvider handlers={{}}>
+                <Renderer spec={spec} registry={registry} />
+              </ActionProvider>
+            </VisibilityProvider>
+          </StateProvider>
+        </div>
       ) : (
         <EmptyPreview />
       )}
