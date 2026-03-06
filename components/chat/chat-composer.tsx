@@ -23,6 +23,17 @@ type ChatComposerProps = {
   onStopAction: () => void;
 };
 
+function ErrorBox(props: { message: string }) {
+  return (
+    <p
+      className="mt-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+      data-testid="chat-composer-error"
+    >
+      {props.message}
+    </p>
+  );
+}
+
 export function ChatComposer({
   models,
   selectedModelId,
@@ -97,14 +108,7 @@ export function ChatComposer({
         </div>
       </form>
 
-      {error ? (
-        <p
-          className="mt-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-          data-testid="chat-composer-error"
-        >
-          {error.message}
-        </p>
-      ) : null}
+      {error ? <ErrorBox message={error.message} /> : null}
     </div>
   );
 }

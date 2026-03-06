@@ -52,7 +52,7 @@ export function ChatSidebar({
       className={cn(
         "flex min-h-0 flex-col overflow-hidden border-r border-border/70 bg-card/35 transition-[width] duration-200 md:shrink-0",
         isResizing && "transition-none",
-        isOpen ? "w-full md:w-[var(--chat-sidebar-width)]" : "w-0 border-r-0",
+        isOpen ? "w-full md:w-(--chat-sidebar-width)" : "w-0 border-r-0",
       )}
       style={{ "--chat-sidebar-width": `${width}px` } as CSSProperties}
     >
