@@ -20,4 +20,5 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
+  testMatch: /.*\.e2e\.test\.ts/,
 });
