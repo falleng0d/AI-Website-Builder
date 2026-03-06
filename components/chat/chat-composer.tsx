@@ -3,10 +3,11 @@
 import type { ModelOption } from "@/hooks/use-chat-models";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Square, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { ChatModelSelector } from "./chat-model-selector";
 import { ChatSendButton } from "./chat-send-button";
+import { ChatStopButton } from "@/components/chat/chat-stop-button";
 
 type ChatComposerProps = {
   models: readonly ModelOption[];
@@ -77,12 +78,6 @@ export function ChatComposer({
           </Button>
 
           <div className="ml-auto flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
-            {isRunning ? (
-              <Button type="button" variant="outline" onClick={onStopAction}>
-                <Square className="h-4 w-4" />
-                Stop
-              </Button>
-            ) : null}
             <ChatModelSelector
               className="flex-1"
               disabled={isRunning}
@@ -90,7 +85,7 @@ export function ChatComposer({
               onSelectModelAction={onSelectModelAction}
               selectedModelId={selectedModelId}
             />
-            <ChatSendButton disabled={!inputText.trim() || isRunning} />
+            {isRunning ? <ChatStopButton onClick={onStopAction} /> : <ChatSendButton />}
           </div>
         </div>
       </form>

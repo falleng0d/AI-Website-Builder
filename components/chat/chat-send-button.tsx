@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { SendHorizontal } from "lucide-react";
 
 type ChatSendButtonProps = {
-  disabled: boolean;
+  disabled?: boolean;
 };
 
-export function ChatSendButton({ disabled }: ChatSendButtonProps) {
+export function ChatSendButton({ disabled = false }: ChatSendButtonProps) {
   return (
     <Button type="submit" disabled={disabled}>
       <SendHorizontal className="h-4 w-4" />
