@@ -39,7 +39,7 @@ type UIHierarchyItem = {
 function cloneElement(element: UIElementDefinition): UIElementDefinition {
   return {
     ...element,
-    props: element.props ? { ...element.props } : undefined,
+    props: { ...(element.props ?? {}) },
     children: [...(element.children ?? [])],
   };
 }

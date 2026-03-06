@@ -33,6 +33,7 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
   const [inputText, setInputText] = useState("");
   const [errorDismissed, setErrorDismissed] = useState(false);
   const selectedModelSchema = useMemo(() => z.string().min(1).default(props.defaultModelId), [props.defaultModelId]);
+
   const [showSidebar, setShowSidebar] = usePersistedState("showSidebar", showSidebarSchema);
   const [sidebarWidth, setSidebarWidth] = usePersistedState("sidebarWidth", sidebarWidthSchema);
   const [selectedModelId, setSelectedModelId] = usePersistedState("selectedModelId", selectedModelSchema);
@@ -62,9 +63,8 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        body: { modelId: selectedModelId },
       }),
-    [selectedModelId],
+    [],
   );
 
   const { messages, sendMessage, status, error, stop, setMessages } = useChat({
@@ -78,7 +78,7 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
     }
   }, [error]);
 
-  useGeneratedUI(messages);
+  const { spec: currentUISpec } = useGeneratedUI(messages);
 
   const visibleMessages = useMemo(() => messages.filter((message) => message.role !== "system"), [messages]);
 
@@ -93,7 +93,7 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
     if (!trimmed || isRunning) return;
 
     setInputText("");
-    await sendMessage({ text: trimmed });
+    await sendMessage({ text: trimmed }, { body: { modelId: selectedModelId, currentUISpec } });
   };
 
   return (
@@ -132,7 +132,9 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
           <DialogContent className="sm:max-w-md" data-testid="chat-composer-error">
             <DialogHeader>
               <DialogTitle className="text-destructive">Error</DialogTitle>
-              <DialogDescription className="pt-2 text-destructive/80">{error.message}</DialogDescription>
+              <DialogDescription className="max-h-48 overflow-y-auto pt-2 text-destructive/80">
+                {error.message}
+              </DialogDescription>
             </DialogHeader>
           </DialogContent>
         </Dialog>
