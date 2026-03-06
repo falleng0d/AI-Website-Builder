@@ -92,10 +92,50 @@ To replace the element at `root.hero`, call **replace_element** with:
 - Grid: { columns?: number, gap?: "sm" | "md" | "lg" } — Grid layout, 1-6 columns [accepts children]
 - Separator: { orientation?: "horizontal" | "vertical" } — Visual divider line
 
+**Navigation:**
+
+- Tabs: { tabs: Array<{ label: string, value: string }>, defaultValue?: string, value?: string } — Tab navigation [accepts children]
+- Accordion: { items: Array<{ title: string, content: string }>, type?: "single" | "multiple" } — Collapsible sections
+- Collapsible: { title: string, defaultOpen?: boolean } — Collapsible section with trigger [accepts children]
+- Pagination: { totalPages: number, page?: number } — Page navigation
+
+**Overlay:**
+
+- Drawer: { title: string, description?: string, openPath: string } — Bottom sheet drawer [accepts children]
+- Tooltip: { content: string, text: string } — Hover tooltip
+- Popover: { trigger: string, content: string } — Click-triggered popover
+- DropdownMenu: { label: string, items: Array<{ label: string, value: string }>, value?: string } — Dropdown menu
+
 **Content:**
 
 - Heading: { text: string, level?: "h1" | "h2" | "h3" | "h4" } — Heading text
 - Text: { text: string, variant?: "body" | "caption" | "muted" | "lead" | "code" } — Paragraph text
+- Image: { src?: string, alt: string, width?: number, height?: number } — Image or image placeholder
+- Avatar: { src?: string, name: string, size?: "sm" | "md" | "lg" } — Avatar with initials fallback
+- Badge: { text: string, variant?: "default" | "secondary" | "destructive" | "outline" } — Status badge
+- Alert: { title: string, message?: string, type?: "info" | "success" | "warning" | "error" } — Alert banner
+- Carousel: { items: Array<{ title?: string, description?: string }> } — Horizontally scrollable carousel
+- Table: { columns: string[], rows: string[][], caption?: string } — Data table
+
+**Feedback:**
+
+- Progress: { value: number, max?: number, label?: string } — Progress bar
+- Skeleton: { width?: string, height?: string, rounded?: boolean } — Loading placeholder
+
+**Input:**
+
+- Button: { label: string, variant?: "primary" | "secondary" | "danger", disabled?: boolean } — Clickable button
+- Link: { label: string, href: string } — Anchor link
+- Input: { label: string, name: string, type?: "text" | "email" | "password" | "number", placeholder?: string, value?: string, checks?: Array<{ type: string, message: string, args?: Record<string, unknown> }>, validateOn?: "change" | "blur" | "submit" } — Text input
+- Textarea: { label: string, name: string, placeholder?: string, rows?: number, value?: string, checks?: Array<{ type: string, message: string, args?: Record<string, unknown> }>, validateOn?: "change" | "blur" | "submit" } — Multi-line text input
+- Select: { label: string, name: string, options: string[], placeholder?: string, value?: string, checks?: Array<{ type: string, message: string, args?: Record<string, unknown> }>, validateOn?: "change" | "blur" | "submit" } — Dropdown select
+- Checkbox: { label: string, name: string, checked?: boolean, checks?: Array<{ type: string, message: string, args?: Record<string, unknown> }>, validateOn?: "change" | "blur" | "submit" } — Checkbox input
+- Radio: { label: string, name: string, options: string[], value?: string, checks?: Array<{ type: string, message: string, args?: Record<string, unknown> }>, validateOn?: "change" | "blur" | "submit" } — Radio button group
+- Switch: { label: string, name: string, checked?: boolean, checks?: Array<{ type: string, message: string, args?: Record<string, unknown> }>, validateOn?: "change" | "blur" | "submit" } — Toggle switch
+- Slider: { label?: string, min?: number, max?: number, step?: number, value?: number } — Range slider
+- Toggle: { label: string, pressed?: boolean, variant?: "default" | "outline" } — Toggle button
+- ToggleGroup: { items: Array<{ label: string, value: string }>, type?: "single" | "multiple", value?: string } — Group of toggle buttons
+- ButtonGroup: { buttons: Array<{ label: string, value: string }>, selected?: string } — Segmented button group
 
 ### Rules
 
