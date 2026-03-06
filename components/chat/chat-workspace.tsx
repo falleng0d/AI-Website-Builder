@@ -4,11 +4,13 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { usePersistedState } from "@/lib/chat-config";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { GeneratedUIProvider } from "@/context/GeneratedUIContext";
 import { ChatPreviewPanel } from "./chat-preview-panel";
 import { ChatResizeHandle } from "./chat-resize-handle";
 import { ChatSidebar } from "./chat-sidebar";
 import { ChatTopBar } from "./chat-top-bar";
 import { useResizable } from "@/hooks/use-resizable";
+import { useGeneratedUI } from "@/hooks/use-generated-ui";
 import { z } from "zod";
 import { ModelOption } from "@/hooks/use-chat-models";
 import { User } from "@/lib/types";
@@ -26,7 +28,7 @@ interface ChatWorkspaceProps {
   user?: User;
 }
 
-export function ChatWorkspace(props: ChatWorkspaceProps) {
+function ChatWorkspaceInner(props: ChatWorkspaceProps) {
   const [inputText, setInputText] = useState("");
   const selectedModelSchema = useMemo(() => z.string().min(1).default(props.defaultModelId), [props.defaultModelId]);
   const [showSidebar, setShowSidebar] = usePersistedState("showSidebar", showSidebarSchema);
@@ -73,6 +75,8 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
   const { messages, sendMessage, status, error, stop, setMessages } = useChat({
     transport,
   });
+
+  useGeneratedUI(messages);
 
   const visibleMessages = useMemo(() => messages.filter((message) => message.role !== "system"), [messages]);
 
@@ -122,5 +126,13 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
         <ChatPreviewPanel isSidebarOpen={showSidebar} />
       </div>
     </div>
+  );
+}
+
+export function ChatWorkspace(props: ChatWorkspaceProps) {
+  return (
+    <GeneratedUIProvider>
+      <ChatWorkspaceInner {...props} />
+    </GeneratedUIProvider>
   );
 }
