@@ -1,0 +1,67 @@
+services:
+  traefik:
+    image: traefik:v3.3
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --api.dashboard=false
+      - --log.level=INFO
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - web
+    depends_on:
+      app:
+        condition: service_started
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/ai-website-builder
+    depends_on:
+      db:
+        condition: service_healthy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=ai-website-builder_web
+      - traefik.http.routers.ai-website-builder.rule=PathPrefix(`/`)
+      - traefik.http.routers.ai-website-builder.entrypoints=web
+      - traefik.http.services.ai-website-builder.loadbalancer.server.port=3000
+    restart: unless-stopped
+    networks:
+      - web
+      - internal
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ai-website-builder
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai-website-builder"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+
+volumes:
+  postgres_data:
+
+networks:
+  web:
+  internal:
