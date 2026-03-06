@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { createToolErrorGuard } from "./tool-call-guards";
 
 test.setTimeout(30000);
 
@@ -114,10 +115,12 @@ test("model selector updates and persists the selected chat model", async ({ pag
   await ensureAuthenticated(page);
 
   const overlayGuard = createOverlayGuard(page);
+  const toolErrorGuard = createToolErrorGuard(page, overlayPollIntervalMs);
 
   try {
     await Promise.race([
       overlayGuard.guard,
+      toolErrorGuard.guard,
       (async () => {
         await page.goto("/chat", { waitUntil: "domcontentloaded" });
 
@@ -155,9 +158,12 @@ test("model selector updates and persists the selected chat model", async ({ pag
         expect(persistedConfig.selectedModelId).toBe(targetName);
 
         await page.reload({ waitUntil: "domcontentloaded" });
-        await expect(page.locator("form").last().getByRole("button").filter({ hasText: /.+/ }).nth(1)).toContainText(targetName, {
-          timeout: actionTimeout,
-        });
+        await expect(page.locator("form").last().getByRole("button").filter({ hasText: /.+/ }).nth(1)).toContainText(
+          targetName,
+          {
+            timeout: actionTimeout,
+          },
+        );
 
         if (itemCount > 1) {
           expect(targetName).not.toBe(initialLabel);
@@ -166,6 +172,8 @@ test("model selector updates and persists the selected chat model", async ({ pag
     ]);
   } finally {
     overlayGuard.stop();
+    toolErrorGuard.stop();
     await overlayGuard.guard.catch(() => undefined);
+    await toolErrorGuard.guard.catch(() => undefined);
   }
 });

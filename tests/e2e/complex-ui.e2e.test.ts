@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { createToolErrorGuard } from "./tool-call-guards";
 
 test.setTimeout(180000);
 
@@ -142,6 +143,7 @@ test("agent creates complex UI using all components and calls set_ui successfull
 
   const overlayGuard = createOverlayGuard(page);
   const errorDialogGuard = createErrorDialogGuard(page);
+  const toolErrorGuard = createToolErrorGuard(page, overlayPollIntervalMs);
 
   let testPassed = false;
 
@@ -149,6 +151,7 @@ test("agent creates complex UI using all components and calls set_ui successfull
     await Promise.race([
       overlayGuard.guard,
       errorDialogGuard.guard,
+      toolErrorGuard.guard,
       (async () => {
         await page.goto("/chat");
 
@@ -214,8 +217,10 @@ test("agent creates complex UI using all components and calls set_ui successfull
   } finally {
     overlayGuard.stop();
     errorDialogGuard.stop();
+    toolErrorGuard.stop();
     await overlayGuard.guard.catch(() => undefined);
     await errorDialogGuard.guard.catch(() => undefined);
+    await toolErrorGuard.guard.catch(() => undefined);
   }
 
   expect(testPassed).toBe(true);

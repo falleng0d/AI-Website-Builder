@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { createToolErrorGuard } from "./tool-call-guards";
 
 test.setTimeout(90000);
 
@@ -165,11 +166,13 @@ test("agent generates UI that renders in the preview panel", async ({ page }, te
 
   const overlayGuard = createOverlayGuard(page);
   const errorDialogGuard = createErrorDialogGuard(page);
+  const toolErrorGuard = createToolErrorGuard(page, overlayPollIntervalMs);
 
   try {
     await Promise.race([
       overlayGuard.guard,
       errorDialogGuard.guard,
+      toolErrorGuard.guard,
       (async () => {
         await page.goto("/chat");
 
@@ -203,8 +206,10 @@ test("agent generates UI that renders in the preview panel", async ({ page }, te
   } finally {
     overlayGuard.stop();
     errorDialogGuard.stop();
+    toolErrorGuard.stop();
     await overlayGuard.guard.catch(() => undefined);
     await errorDialogGuard.guard.catch(() => undefined);
+    await toolErrorGuard.guard.catch(() => undefined);
   }
 });
 
@@ -215,11 +220,13 @@ test("agent can inspect and surgically edit generated UI", async ({ page }, test
 
   const overlayGuard = createOverlayGuard(page);
   const errorDialogGuard = createErrorDialogGuard(page);
+  const toolErrorGuard = createToolErrorGuard(page, overlayPollIntervalMs);
 
   try {
     await Promise.race([
       overlayGuard.guard,
       errorDialogGuard.guard,
+      toolErrorGuard.guard,
       (async () => {
         await page.goto("/chat");
 
@@ -240,10 +247,7 @@ test("agent can inspect and surgically edit generated UI", async ({ page }, test
         await expect(previewPanel.getByText("Card5")).toBeVisible({ timeout: llmTimeout });
         await waitForAssistantToSettle(page);
 
-        await submitPrompt(
-          page,
-          'Use list_ui on path "root" and briefly confirm the hierarchy you find.',
-        );
+        await submitPrompt(page, 'Use list_ui on path "root" and briefly confirm the hierarchy you find.');
 
         await expect(page.getByText("root.card-4.card-5", { exact: false })).toBeVisible({ timeout: llmTimeout });
         await waitForAssistantToSettle(page);
@@ -257,10 +261,7 @@ test("agent can inspect and surgically edit generated UI", async ({ page }, test
         await expect(previewPanel.getByText("Edited through edit_element")).toBeVisible({ timeout: llmTimeout });
         await waitForAssistantToSettle(page);
 
-        await submitPrompt(
-          page,
-          'Use delete_element on path "root.card-4". Do not rebuild the full UI.',
-        );
+        await submitPrompt(page, 'Use delete_element on path "root.card-4". Do not rebuild the full UI.');
 
         await expect(previewPanel.getByText("Card4")).not.toBeVisible({ timeout: llmTimeout });
         await expect(previewPanel.getByText("Card5")).not.toBeVisible({ timeout: llmTimeout });
@@ -280,7 +281,9 @@ test("agent can inspect and surgically edit generated UI", async ({ page }, test
   } finally {
     overlayGuard.stop();
     errorDialogGuard.stop();
+    toolErrorGuard.stop();
     await overlayGuard.guard.catch(() => undefined);
     await errorDialogGuard.guard.catch(() => undefined);
+    await toolErrorGuard.guard.catch(() => undefined);
   }
 });

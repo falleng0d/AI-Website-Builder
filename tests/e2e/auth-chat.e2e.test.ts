@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { createToolErrorGuard } from "./tool-call-guards";
 
 test.setTimeout(30000);
 
@@ -141,11 +142,13 @@ test("login/create user, send hi then how are you, and screenshot result", async
 
   const overlayGuard = createOverlayGuard(page);
   const errorDialogGuard = createErrorDialogGuard(page);
+  const toolErrorGuard = createToolErrorGuard(page, overlayPollIntervalMs);
 
   try {
     await Promise.race([
       overlayGuard.guard,
       errorDialogGuard.guard,
+      toolErrorGuard.guard,
       (async () => {
         await page.goto("/chat");
 
@@ -180,7 +183,9 @@ test("login/create user, send hi then how are you, and screenshot result", async
   } finally {
     overlayGuard.stop();
     errorDialogGuard.stop();
+    toolErrorGuard.stop();
     await overlayGuard.guard.catch(() => undefined);
     await errorDialogGuard.guard.catch(() => undefined);
+    await toolErrorGuard.guard.catch(() => undefined);
   }
 });
