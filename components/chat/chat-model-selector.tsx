@@ -38,7 +38,12 @@ export function ChatModelSelector({
   className,
   onSelectModelAction,
 }: ChatModelSelectorProps) {
+  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (disabled) {
@@ -57,6 +62,32 @@ export function ChatModelSelector({
 
   const selectedProvider = getModelProvider(selectedModel.id);
 
+  const triggerContent = (
+    <>
+      <span className="flex min-w-0 items-center gap-2">
+        {selectedProvider ? (
+          <ModelSelectorLogo className="size-4 shrink-0 rounded-full bg-background p-px ring-1" provider={selectedProvider} />
+        ) : (
+          <Sparkles className="size-4 shrink-0 text-muted-foreground" />
+        )}
+        <span className="truncate">{selectedModel.name}</span>
+      </span>
+      <ChevronsUpDown className="size-4 shrink-0 opacity-60" />
+    </>
+  );
+
+  if (!mounted) {
+    return (
+      <Button
+        className={cn("max-w-[min(18vw,22rem)] min-w-0 justify-between gap-2", className)}
+        disabled={true}
+        variant="outline"
+      >
+        {triggerContent}
+      </Button>
+    );
+  }
+
   return (
     <ModelSelector onOpenChange={setOpen} open={open}>
       <ModelSelectorTrigger asChild>
@@ -65,18 +96,7 @@ export function ChatModelSelector({
           disabled={disabled}
           variant="outline"
         >
-          <span className="flex min-w-0 items-center gap-2">
-            {selectedProvider ? (
-              <ModelSelectorLogo
-                className="size-4 shrink-0 rounded-full bg-background p-px ring-1"
-                provider={selectedProvider}
-              />
-            ) : (
-              <Sparkles className="size-4 shrink-0 text-muted-foreground" />
-            )}
-            <span className="truncate">{selectedModel.name}</span>
-          </span>
-          <ChevronsUpDown className="size-4 shrink-0 opacity-60" />
+          {triggerContent}
         </Button>
       </ModelSelectorTrigger>
 
