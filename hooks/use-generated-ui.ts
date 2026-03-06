@@ -1,5 +1,7 @@
 "use client";
 
+import { useSVGRegistryContext } from "@/context/SVGRegistryContext";
+import type { SVGRegistryMap } from "@/lib/json-ui/svg-registry";
 import type { UISpec } from "@/lib/json-ui/types";
 import type { UIMessage } from "ai";
 import { useEffect, useRef } from "react";
@@ -21,6 +23,7 @@ function hasOutput(part: ToolPart): part is ToolPart & { state: "output-availabl
 }
 
 const SPEC_UPDATING_TOOLS = new Set(["set_ui", "delete_element", "replace_element", "edit_element"]);
+const SVG_UPDATING_TOOLS = new Set(["create_svg"]);
 
 /**
  * Watches chat messages for UI tool results and syncs the latest spec
@@ -28,41 +31,53 @@ const SPEC_UPDATING_TOOLS = new Set(["set_ui", "delete_element", "replace_elemen
  */
 export function useGeneratedUI(messages: readonly UIMessage[]) {
   const { spec, setSpec, clearSpec } = useGeneratedUIContext();
-  const lastProcessedRef = useRef<string | undefined>(undefined);
+  const { clearRegistry, setRegistry, setSvg } = useSVGRegistryContext();
+  const processedToolCallIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    // Scan messages in reverse to find the most recent UI tool result
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const message = messages[i];
+    if (messages.length === 0) {
+      processedToolCallIdsRef.current.clear();
+      return;
+    }
+
+    for (const message of messages) {
       if (message.role !== "assistant") continue;
 
-      const parts = message.parts;
-      for (let j = parts.length - 1; j >= 0; j--) {
-        const part = parts[j];
+      for (const part of message.parts) {
         if (!isToolPart(part) || !hasOutput(part)) continue;
 
-        const toolName = getToolName(part);
-        if (!SPEC_UPDATING_TOOLS.has(toolName) && toolName !== "clear_ui") continue;
-
         const resultKey = getToolCallId(part);
-        if (lastProcessedRef.current === resultKey) return;
-        lastProcessedRef.current = resultKey;
+        if (processedToolCallIdsRef.current.has(resultKey)) continue;
+        processedToolCallIdsRef.current.add(resultKey);
+
+        const toolName = getToolName(part);
 
         if (SPEC_UPDATING_TOOLS.has(toolName)) {
           const result = part.output as { spec?: UISpec };
-          if (result?.spec) {
-            setSpec(result.spec);
-          }
-          return;
+          if (result?.spec) setSpec(result.spec);
+          continue;
         }
 
         if (toolName === "clear_ui") {
           clearSpec();
-          return;
+          clearRegistry();
+          continue;
+        }
+
+        if (SVG_UPDATING_TOOLS.has(toolName)) {
+          const result = part.output as { registry?: SVGRegistryMap; slug?: string; svg?: string };
+          if (result.registry) {
+            setRegistry(result.registry);
+            continue;
+          }
+
+          if (result.slug && result.svg) {
+            setSvg(result.slug, result.svg);
+          }
         }
       }
     }
-  }, [messages, setSpec, clearSpec]);
+  }, [clearRegistry, clearSpec, messages, setRegistry, setSpec, setSvg]);
 
   return { spec };
 }

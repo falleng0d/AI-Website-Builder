@@ -1,5 +1,6 @@
 import { createAgentUIStreamResponse, UIMessage } from "ai";
 import { createChatAgent } from "@/lib/agents/chat-agent";
+import type { SVGRegistryMap } from "@/lib/json-ui/svg-registry";
 import type { UISpec } from "@/lib/json-ui/types";
 import { createUITools } from "@/lib/tools/ui-tools";
 import { z } from "zod";
@@ -17,18 +18,22 @@ const uiSpecSchema: z.ZodType<UISpec> = z.object({
   elements: z.record(z.string(), elementSchema),
 });
 
+const svgRegistrySchema: z.ZodType<SVGRegistryMap> = z.record(z.string(), z.string());
+
 export async function POST(req: Request) {
   const {
     messages,
     id: threadId,
     modelId: requestedModelId,
     currentUISpec,
+    currentSVGRegistry,
     previewTheme,
   }: {
     messages: UIMessage[];
     id?: string;
     modelId?: string;
     currentUISpec?: unknown;
+    currentSVGRegistry?: unknown;
     previewTheme?: unknown;
   } = await req.json();
 
@@ -36,9 +41,13 @@ export async function POST(req: Request) {
   const parsedThreadId = z.string({ error: "threadId is required" }).min(1).parse(threadId);
   const parsedModelId = z.string().min(1).safeParse(requestedModelId);
   const parsedCurrentUISpec = uiSpecSchema.optional().safeParse(currentUISpec);
+  const parsedCurrentSVGRegistry = svgRegistrySchema.optional().safeParse(currentSVGRegistry);
   const parsedPreviewTheme = previewThemeSchema.catch("light").parse(previewTheme);
 
-  const uiTools = createUITools(parsedCurrentUISpec.success ? parsedCurrentUISpec.data : undefined);
+  const uiTools = createUITools(
+    parsedCurrentUISpec.success ? parsedCurrentUISpec.data : undefined,
+    parsedCurrentSVGRegistry.success ? parsedCurrentSVGRegistry.data : undefined,
+  );
 
   const agent = createChatAgent({
     modelId: parsedModelId.success ? parsedModelId.data : defaultModelId,

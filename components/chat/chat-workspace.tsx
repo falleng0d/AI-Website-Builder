@@ -6,6 +6,7 @@ import { ComponentTreeProvider, useComponentTreeContext } from "@/context/Compon
 import { usePersistedState } from "@/lib/chat-config";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GeneratedUIProvider, useGeneratedUIContext } from "@/context/GeneratedUIContext";
+import { SVGRegistryProvider, useSVGRegistryContext } from "@/context/SVGRegistryContext";
 import { ComponentTreePanel } from "./component-tree-panel";
 import { ChatPreviewPanel } from "./chat-preview-panel";
 import { ChatResizeHandle } from "./chat-resize-handle";
@@ -85,12 +86,18 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
 
   const { spec: currentUISpec } = useGeneratedUI(messages);
   const { clearSpec, spec } = useGeneratedUIContext();
+  const { clearRegistry, registry: currentSVGRegistry } = useSVGRegistryContext();
   const { setHoveredElementId } = useComponentTreeContext();
 
   const visibleMessages = useMemo(() => messages.filter((message) => message.role !== "system"), [messages]);
 
   const isRunning = status === "submitted" || status === "streaming";
   const hasGeneratedUI = Boolean(spec);
+
+  const clearGeneratedPreview = () => {
+    clearSpec();
+    clearRegistry();
+  };
 
   useEffect(() => {
     if (!hasGeneratedUI) {
@@ -107,7 +114,10 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
     if (!trimmed || isRunning) return;
 
     setInputText("");
-    await sendMessage({ text: trimmed }, { body: { modelId: selectedModelId, currentUISpec, previewTheme: PREVIEW_THEME } });
+    await sendMessage(
+      { text: trimmed },
+      { body: { modelId: selectedModelId, currentUISpec, currentSVGRegistry, previewTheme: PREVIEW_THEME } },
+    );
   };
 
   return (
@@ -118,7 +128,7 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
         isComponentTreeOpen={showComponentTree && hasGeneratedUI}
         onToggleSidebarAction={() => setShowSidebar(!showSidebar)}
         onToggleComponentTreeAction={() => setShowComponentTree((current) => !current)}
-        onClearUIAction={clearSpec}
+        onClearUIAction={clearGeneratedPreview}
       />
 
       <div ref={containerRef} className="flex min-h-0 flex-1">
@@ -169,9 +179,11 @@ function ChatWorkspaceInner(props: ChatWorkspaceProps) {
 export function ChatWorkspace(props: ChatWorkspaceProps) {
   return (
     <GeneratedUIProvider initialSpec={props.initialSpec}>
-      <ComponentTreeProvider>
-        <ChatWorkspaceInner {...props} />
-      </ComponentTreeProvider>
+      <SVGRegistryProvider>
+        <ComponentTreeProvider>
+          <ChatWorkspaceInner {...props} />
+        </ComponentTreeProvider>
+      </SVGRegistryProvider>
     </GeneratedUIProvider>
   );
 }

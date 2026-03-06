@@ -1,4 +1,5 @@
 import { tool } from "ai";
+import { cloneSVGRegistry, createUniqueSVGSlug, sanitizeSVG, type SVGRegistryMap } from "@/lib/json-ui/svg-registry";
 import { z } from "zod/v4";
 import type { UISpec } from "@/lib/json-ui/types";
 
@@ -182,8 +183,9 @@ function setCurrentSpec(nextSpec: UISpec): UISpec {
   return cloneSpec(validatedSpec);
 }
 
-export function createUITools(initialSpec?: UISpec) {
+export function createUITools(initialSpec?: UISpec, initialSVGRegistry?: SVGRegistryMap) {
   let currentSpec: UISpec | undefined = initialSpec ? setCurrentSpec(initialSpec) : undefined;
+  let currentSVGRegistry: SVGRegistryMap = cloneSVGRegistry(initialSVGRegistry);
 
   const set_ui = tool({
     description:
@@ -364,5 +366,35 @@ export function createUITools(initialSpec?: UISpec) {
     },
   });
 
-  return { set_ui, get_ui, list_ui, delete_element, replace_element, edit_element, clear_ui };
+  const create_svg = tool({
+    description:
+      "Create a reusable sanitized SVG asset for the preview. " +
+      "Pass a name slug and a full SVG string, then reuse the returned slug in logoSvgRef or imageSvgRef props.",
+    inputSchema: z.object({
+      nameSlug: z
+        .string()
+        .min(1)
+        .max(80)
+        .describe("Short kebab-case name for the SVG asset, for example 'nova-logo' or 'hero-dashboard-illustration'."),
+      svg: z.string().min(1).describe("Full inline SVG markup starting with <svg> and ending with </svg>."),
+    }),
+    execute: async ({ nameSlug, svg }) => {
+      const sanitizedSVG = sanitizeSVG(svg);
+      const slug = createUniqueSVGSlug(currentSVGRegistry, nameSlug, sanitizedSVG);
+
+      currentSVGRegistry = {
+        ...currentSVGRegistry,
+        [slug]: sanitizedSVG,
+      };
+
+      return {
+        success: true,
+        slug,
+        svg: sanitizedSVG,
+        registry: cloneSVGRegistry(currentSVGRegistry),
+      };
+    },
+  });
+
+  return { set_ui, get_ui, list_ui, delete_element, replace_element, edit_element, clear_ui, create_svg };
 }
