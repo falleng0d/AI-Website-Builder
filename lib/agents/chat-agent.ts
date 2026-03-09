@@ -1,3 +1,4 @@
+import "server-only";
 import { ToolLoopAgent, stepCountIs, type Tool } from "ai";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
