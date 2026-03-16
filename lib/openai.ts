@@ -16,6 +16,7 @@ export async function listModels(): Promise<ModelsList> {
     headers: {
       Authorization: `Bearer ${openaiApiKey}`,
     },
+    next: { revalidate: 60, tags: ["models"] },
   });
 
   if (!response.ok) {
