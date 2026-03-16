@@ -1,12 +1,13 @@
 "use client";
 
-import { signInWithGithub } from "@/actions/github-auth-action";
 import Logo from "@/components/logo";
 import SignInForm from "@/components/sign-in-form";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { JSX, SVGProps } from "react";
 import { GithubIcon } from "lucide-react";
+import { useGithubSignIn } from "@/hooks/use-github-signin";
+import { Spinner } from "@/components/ui/spinner";
 
 const GoogleIcon = (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
   <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
@@ -14,11 +15,20 @@ const GoogleIcon = (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) =>
   </svg>
 );
 
+const Loader = () => (
+  <div className="absolute top-0 left-0 z-20 flex h-full w-full items-center justify-center bg-background/60">
+    <Spinner></Spinner>
+  </div>
+);
+
 export default function SignInSection() {
+  const { isPending, signIn: signInWithGithub } = useGithubSignIn();
+
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="flex flex-1 flex-col justify-center px-4 py-10 lg:px-6">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="relative sm:mx-auto sm:w-full sm:max-w-md">
+          {isPending && <Loader />}
           <div className="flex items-center">
             <Logo />
           </div>

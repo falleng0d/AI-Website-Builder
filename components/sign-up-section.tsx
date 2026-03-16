@@ -1,12 +1,12 @@
 "use client";
 
-import { signInWithGithub } from "@/actions/github-auth-action";
 import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { JSX, SVGProps } from "react";
 import SignUpForm from "./sign-up-form";
 import { GithubIcon } from "lucide-react";
+import { useGithubSignIn } from "@/hooks/use-github-signin";
 
 const GoogleIcon = (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
   <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
@@ -15,6 +15,8 @@ const GoogleIcon = (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) =>
 );
 
 export default function SignUpSection() {
+  const { isPending, signIn: signInWithGithub } = useGithubSignIn();
+
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="flex flex-1 flex-col justify-center px-4 py-10 lg:px-6">
