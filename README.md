@@ -1,6 +1,6 @@
 # AI Website Builder
 
-An open-source website builder. The app combines a chat-first interface, AI-powered UI generation, live preview tooling, authentication, and PostgreSQL-backed persistence so users can build websites by talking to an assistant.
+A Proof-Of-Concept open-source website builder. The app combines a chat-first interface, AI-powered UI generation, live preview tooling, authentication, and PostgreSQL-backed persistence so users can build websites by talking to an assistant.
 
 ## Overview
 
@@ -235,4 +235,8 @@ If you want to grow the builder experience, the main extension points are:
 
 ## License
 
-No license file is currently present in the repository. Add one if you plan to distribute the project publicly.
+MIT License. See [LICENSE](LICENSE) for details.
+
+## Author
+
+Mateus Junior - [GitHub](https://github.com/falleng0d)
