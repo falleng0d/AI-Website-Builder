@@ -12,6 +12,9 @@ This project is built with Next.js 16 and the App Router. It includes:
 - Prisma ORM with PostgreSQL for auth and chat persistence
 - Tailwind CSS and shadcn/ui for the application interface
 - Playwright and Vitest for automated testing
+  
+- ![chat.png](.README/chat.png)
+- ![home.png](.README/home.png)
 
 ## Core Features
 
@@ -25,13 +28,13 @@ This project is built with Next.js 16 and the App Router. It includes:
 
 ## Tech Stack
 
-- Framework: Next.js 16
+- Framework: Next.js 16 App Router
 - Runtime/UI: React 19
 - Package manager: Bun
 - Auth: Better Auth
 - Database: PostgreSQL + Prisma ORM
 - AI: Vercel AI SDK + `@ai-sdk/openai`
-- Styling: Tailwind CSS v4 + shadcn/ui
+- Styling: Tailwind CSS v4 + shadcn/ui + Radix UI
 - Testing: Vitest + Playwright
 
 ## How It Works
@@ -154,8 +157,6 @@ bun run dev
 ```
 
 The app runs at `http://localhost:3000` by default.
-
-The project notes also mention a proxied development host at `https://darka.ayu-hamlet.ts.net`, which forwards to port 3000 in the current team setup.
 
 ## Available Scripts
 
