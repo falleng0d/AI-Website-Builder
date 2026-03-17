@@ -6,6 +6,7 @@ A Proof-Of-Concept open-source website builder. The app combines a chat-first in
 
 This project is built with Next.js 16 and the App Router. It includes:
 
+- Json-driven UI generation using cutom tools exposed to the agent, with a live preview of the generated UI
 - Better Auth for email/password and GitHub authentication
 - A chat workspace powered by the Vercel AI SDK and OpenAI-compatible models
 - JSON-driven UI generation with live preview controls
