@@ -10,13 +10,18 @@ describe("Sandbox Integration Tests", () => {
     timeout: 5 * 60 * 1000,
   };
 
+  const logResult = (label: string, result: unknown) => {
+    console.log(`[Sandbox Integration Tests] ${label}:`, result);
+  };
+
   const getSandbox = async () => {
     if (sandbox?.isAlive()) {
       return sandbox;
     }
 
     sandbox = SandboxFactory.create("vercel");
-    await sandbox.createSandbox(sandboxConfig);
+    const sandboxInfo = await sandbox.createSandbox(sandboxConfig);
+    logResult("sandbox created", sandboxInfo);
 
     return sandbox;
   };
@@ -46,10 +51,12 @@ describe("Sandbox Integration Tests", () => {
     expect(sandboxInfo.url).toBeDefined();
     expect(sandboxInfo.provider).toBe("vercel");
     expect(sandboxInfo.createdAt).toBeInstanceOf(Date);
+    logResult("sandbox info", sandboxInfo);
 
     const url = currentSandbox.getSandboxUrl();
     expect(url).toBeDefined();
     expect(url).toContain("vercel.run");
+    logResult("sandbox url", url);
   });
 
   it("should write and read files", async () => {
@@ -60,6 +67,7 @@ describe("Sandbox Integration Tests", () => {
 
     const readContent = await currentSandbox.readFile("test.txt");
     expect(readContent).toBe(testContent);
+    logResult("read file", { path: "test.txt", content: readContent });
   });
 
   it("should run commands and return results", async () => {
@@ -71,6 +79,7 @@ describe("Sandbox Integration Tests", () => {
     expect(result.exitCode).toBe(0);
     expect(result.success).toBe(true);
     expect(result.stdout).toContain("test output");
+    logResult("command result", result);
   });
 
   it("should install packages successfully", async () => {
@@ -81,6 +90,7 @@ describe("Sandbox Integration Tests", () => {
     expect(result).toBeDefined();
     expect(result.exitCode).toBe(0);
     expect(result.success).toBe(true);
+    logResult("package install", result);
   });
 
   it("should list files in directory", async () => {
@@ -97,6 +107,7 @@ describe("Sandbox Integration Tests", () => {
     expect(files).toContain("file1.txt");
     expect(files).toContain("file2.txt");
     expect(files).toContain("subdir/file3.txt");
+    logResult("listed files", files);
   });
 
   it("should check if sandbox is alive", async () => {
@@ -108,6 +119,7 @@ describe("Sandbox Integration Tests", () => {
 
     const info = currentSandbox.getSandboxInfo();
     expect(info).toBeDefined();
+    logResult("alive status", { isAlive: currentSandbox.isAlive(), info });
   });
 
   it("should setup Vite app with React and Tailwind", async () => {
@@ -121,6 +133,10 @@ describe("Sandbox Integration Tests", () => {
 
     const indexHtml = await currentSandbox.readFile("index.html");
     expect(indexHtml).toContain('<div id="root">');
+    logResult("vite app setup", {
+      packageJsonSnippet: packageJsonContent.slice(0, 200),
+      indexHtmlSnippet: indexHtml.slice(0, 120),
+    });
   });
 
   it("should handle command failures gracefully", async () => {
@@ -130,6 +146,7 @@ describe("Sandbox Integration Tests", () => {
 
     expect(result.success).toBe(false);
     expect(result.exitCode).toBe(1);
+    logResult("failed command", result);
   });
 
   it("should terminate sandbox successfully", async () => {
@@ -140,17 +157,7 @@ describe("Sandbox Integration Tests", () => {
     await currentSandbox.terminate();
 
     expect(currentSandbox.isAlive()).toBe(false);
+    logResult("termination", { isAlive: currentSandbox.isAlive() });
     sandbox = null;
-  });
-
-  afterAll(async () => {
-    if (sandbox) {
-      try {
-        await sandbox.terminate();
-        sandbox = null;
-      } catch (error) {
-        console.error("Error during sandbox cleanup:", error);
-      }
-    }
   });
 });
