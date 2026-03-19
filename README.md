@@ -1,19 +1,22 @@
 # AI Website Builder
 
-A Proof-Of-Concept open-source website builder. The app combines a chat-first interface, AI-powered UI generation, live preview tooling, authentication, and PostgreSQL-backed persistence so users can build websites by talking to an assistant.
+A Proof-Of-Concept open-source website builder. The app combines a chat-first interface,
+AI-powered UI generation, live preview tooling, authentication, and PostgreSQL-backed
+persistence so users can build websites by talking to an assistant.
 
 ## Overview
 
 This project is built with Next.js 16 and the App Router. It includes:
 
-- Json-driven UI generation using cutom tools exposed to the agent, with a live preview of the generated UI
+- Json-driven UI generation using cutom tools exposed to the agent, with a live preview of
+  the generated UI
 - Better Auth for email/password and GitHub authentication
 - A chat workspace powered by the Vercel AI SDK and OpenAI-compatible models
 - JSON-driven UI generation with live preview controls
 - Prisma ORM with PostgreSQL for auth and chat persistence
 - Tailwind CSS and shadcn/ui for the application interface
 - Playwright and Vitest for automated testing
-  
+
 - ![chat.png](.README/chat.png)
 - ![home.png](.README/home.png)
 
@@ -49,7 +52,8 @@ This project is built with Next.js 16 and the App Router. It includes:
 
 ### AI workflow
 
-The chat route in `app/api/chat/route.ts` creates a tool-enabled agent from `lib/agents/chat-agent.ts`. That agent can use UI tools from `lib/tools/ui-tools.ts` to:
+The chat route in `app/api/chat/route.ts` creates a tool-enabled agent from
+`lib/agents/chat-agent.ts`. That agent can use UI tools from `lib/tools/ui-tools.ts` to:
 
 - set a complete UI spec
 - inspect the current generated UI
@@ -57,7 +61,8 @@ The chat route in `app/api/chat/route.ts` creates a tool-enabled agent from `lib
 - clear the preview
 - register sanitized SVG assets for reuse
 
-The frontend chat workspace in `components/chat/chat-workspace.tsx` sends chat messages, tracks model selection, and renders the generated UI preview alongside the conversation.
+The frontend chat workspace in `components/chat/chat-workspace.tsx` sends chat messages,
+tracks model selection, and renders the generated UI preview alongside the conversation.
 
 ### Data model
 
@@ -109,7 +114,8 @@ Before running the project locally, make sure you have:
 bun install
 ```
 
-`postinstall` runs `prisma generate`, so the Prisma client is generated automatically after install.
+`postinstall` runs `prisma generate`, so the Prisma client is generated automatically
+after install.
 
 ### 2. Create your environment file
 
@@ -124,7 +130,7 @@ If you are on Windows without `cp`, create `.env` manually from `.example.env`.
 ### 3. Configure environment variables
 
 | Variable               | Required         | Description                                       |
-| ---------------------- | ---------------- | ------------------------------------------------- |
+|------------------------|------------------|---------------------------------------------------|
 | `HOSTNAME`             | No               | Host used by Playwright and local/dev proxy setup |
 | `BETTER_AUTH_SECRET`   | Yes              | Secret used by Better Auth                        |
 | `BETTER_AUTH_URL`      | Yes              | Base URL for auth callbacks and session handling  |
@@ -162,7 +168,7 @@ The app runs at `http://localhost:3000` by default.
 ## Available Scripts
 
 | Command                  | Description                                 |
-| ------------------------ | ------------------------------------------- |
+|--------------------------|---------------------------------------------|
 | `bun run dev`            | Start the Next.js dev server with Turbopack |
 | `bun run build`          | Create a production build                   |
 | `bun run start`          | Run the production server                   |
@@ -201,10 +207,13 @@ Current Playwright coverage lives under `tests/e2e/` and includes flows for:
 ## Development Notes
 
 - The project uses `app/(generated)` as the Prisma client output directory.
-- `lib/openai.ts` filters unsupported model categories such as embedding, image, video, and audio models before showing options in the chat UI.
-- `lib/tools/toolkit.ts` is the shared registry for agent tools; add new tools there when expanding agent capabilities.
+- `lib/openai.ts` filters unsupported model categories such as embedding, image, video,
+  and audio models before showing options in the chat UI.
+- `lib/tools/toolkit.ts` is the shared registry for agent tools; add new tools there when
+  expanding agent capabilities.
 - Tool schemas should use `zod/v4` when defining new tool inputs.
-- Project guidance recommends running `tscx .` after TypeScript changes to catch type errors.
+- Project guidance recommends running `tscx .` after TypeScript changes to catch type
+  errors.
 
 ## Authentication
 
@@ -230,9 +239,11 @@ If you want to grow the builder experience, the main extension points are:
 ## Troubleshooting
 
 - If model loading fails, verify `OPENAI_BASE_URL`, `OPENAI_API_KEY`, and `DEFAULT_MODEL`.
-- If auth fails, verify `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and GitHub OAuth credentials.
+- If auth fails, verify `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and GitHub OAuth
+  credentials.
 - If Prisma client errors appear, run `bun run db:generate`.
-- If database operations fail, confirm `DATABASE_URL` points to a reachable PostgreSQL instance.
+- If database operations fail, confirm `DATABASE_URL` points to a reachable PostgreSQL
+  instance.
 - If Playwright points to the wrong host, check `HOSTNAME` and `playwright.config.ts`.
 
 ## License
