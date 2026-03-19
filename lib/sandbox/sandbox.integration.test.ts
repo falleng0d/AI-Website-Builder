@@ -1,3 +1,4 @@
+import { chromium } from "@playwright/test";
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { SandboxFactory } from "./factory";
 import type { SandboxProvider } from "./types";
@@ -12,6 +13,35 @@ describe("Sandbox Integration Tests", () => {
 
   const logResult = (label: string, result: unknown) => {
     console.log(`[Sandbox Integration Tests] ${label}:`, result);
+  };
+
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const waitForPreviewResponse = async (url: string, timeoutMs: number = 30000) => {
+    const startTime = Date.now();
+    let lastError: unknown;
+
+    while (Date.now() - startTime < timeoutMs) {
+      try {
+        const response = await fetch(url, { redirect: "follow" });
+        const html = await response.text();
+
+        if (response.ok && html.includes('<div id="root"></div>')) {
+          return {
+            status: response.status,
+            html,
+          };
+        }
+
+        lastError = new Error(`Preview returned status ${response.status}`);
+      } catch (error) {
+        lastError = error;
+      }
+
+      await sleep(1000);
+    }
+
+    throw lastError instanceof Error ? lastError : new Error("Preview server did not become ready in time");
   };
 
   const getSandbox = async () => {
@@ -111,7 +141,9 @@ describe("Sandbox Integration Tests", () => {
   });
 
   it("should check if sandbox is alive", async () => {
-    sandbox = null;
+    const freshSandbox = SandboxFactory.create("vercel");
+
+    expect(freshSandbox.isAlive()).toBe(false);
 
     const currentSandbox = await getSandbox();
 
@@ -137,6 +169,46 @@ describe("Sandbox Integration Tests", () => {
       packageJsonSnippet: packageJsonContent.slice(0, 200),
       indexHtmlSnippet: indexHtml.slice(0, 120),
     });
+  });
+
+  it("should serve the rendered React app from the sandbox preview URL", async () => {
+    const currentSandbox = await getSandbox();
+
+    await currentSandbox.setupViteApp();
+
+    const previewUrl = currentSandbox.getSandboxUrl();
+    expect(previewUrl).toBeDefined();
+
+    if (!previewUrl) {
+      throw new Error("Sandbox preview URL should be defined after Vite setup");
+    }
+
+    const previewResponse = await waitForPreviewResponse(previewUrl, 45000);
+    logResult("preview response", {
+      url: previewUrl,
+      status: previewResponse.status,
+      htmlSnippet: previewResponse.html.slice(0, 200),
+    });
+
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+
+    try {
+      await page.goto(previewUrl, { waitUntil: "domcontentloaded", timeout: 45000 });
+      await page.waitForFunction(() => document.body.innerText.includes("Vercel Sandbox Ready"), undefined, {
+        timeout: 45000,
+      });
+
+      const bodyText = await page.textContent("body");
+
+      expect(bodyText).toContain("Vercel Sandbox Ready");
+      expect(bodyText).toContain("Start building your React app with Vite and Tailwind CSS!");
+
+      logResult("preview body", bodyText);
+    } finally {
+      await page.close();
+      await browser.close();
+    }
   });
 
   it("should handle command failures gracefully", async () => {
